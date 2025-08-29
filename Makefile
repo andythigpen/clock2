@@ -1,5 +1,3 @@
-AIR_VERSION ?= v1.62.0
-
 .PHONY: live/templ
 # run templ generation in watch mode to detect all .templ files and 
 # re-create _templ.txt files on change, then send reload event to browser. 
@@ -10,7 +8,7 @@ live/templ:
 .PHONY: live/server
 # run air to detect any go file changes to re-build and re-run the server.
 live/server:
-	go run github.com/air-verse/air@${AIR_VERSION} \
+	go tool air \
 	--build.cmd "go build -o tmp/bin/main" --build.bin "tmp/bin/main" --build.delay "100" \
 	--build.exclude_dir "node_modules" \
 	--build.include_ext "go" \
@@ -30,7 +28,7 @@ live/esbuild:
 .PHONY: live/sync_assets
 # watch for any js or css change in the assets/ folder, then reload the browser via templ proxy.
 live/sync_assets:
-	go run github.com/air-verse/air@${AIR_VERSION} \
+	go tool air \
 	--build.cmd "go tool templ generate --notify-proxy" \
 	--build.bin "true" \
 	--build.delay "100" \

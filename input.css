@@ -1,1 +1,6 @@
 @import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Dosis&display=swap");
+
+@theme {
+    --default-font-family: Oswald, san-serif;
+}

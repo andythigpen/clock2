@@ -1,0 +1,13 @@
+package components
+
+var classes = []string{"flex", "flex-1", "transition", "duration-700"}
+
+templ carousel() {
+	<div class={ classes }>
+		<!--@weather_current()-->
+		<!--@weather_forecast()-->
+		<!-- @weather_humidity() -->
+		<!-- @weather_precipitation() -->
+		@sun()
+	</div>
+}
