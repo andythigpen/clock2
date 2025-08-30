@@ -8,6 +8,27 @@ package components
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+// evening/morning - vary percentage
+// "bg-linear-to-t from-[#734c67] via-[#313862] via-30% to-[#011b32] to-76%",
+// day vary color
+// "bg-linear-to-t from-[#4c6b73] via-[#313862] via-30% to-[#011b32] to-76%",
+// night
+// "bg-linear-to-t from-[#150d0d] to-black to-45%"
+
+var homeClasses = []string{
+	"flex",
+	//"items-center",
+	//"justify-center",
+	"h-screen",
+	"w-screen",
+	"p-6",
+	"gap-16",
+	"bg-linear-to-t from-[#4c6b73] via-[#313862] via-30% to-[#011b32] to-76%",
+	//"bg-linear-to-t from-[#734c67] via-[#313862] via-30% to-[#011b32] to-76%",
+	//"bg-linear-to-t from-[#0f0a3b] to-[#0a0a0f] to-45%",
+	"transition-1000",
+}
+
 func home() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -29,7 +50,25 @@ func home() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"bg-gradient-45 from-darkbg-900 via-darkbg-800 to-darkbg-900 flex items-center justify-center h-screen w-screen bg-[size:400%_400%] p-6 gap-16\">")
+		var templ_7745c5c3_Var2 = []any{homeClasses}
+		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(templ.CSSClasses(templ_7745c5c3_Var2).String())
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/components/home.templ`, Line: 1, Col: 0}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -41,7 +80,7 @@ func home() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

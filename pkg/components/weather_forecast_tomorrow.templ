@@ -1,0 +1,17 @@
+package components
+
+// TODO vary gradient with temperature
+templ weather_forecast_tomorrow() {
+	<div class="flex-1 flex flex-row gap-8 justify-center items-center">
+		<img src="/assets/icons/weather/clear-day.svg" class="h-96"/>
+		<div class="grow flex flex-col gap-[2rem]">
+			<span class="text-[4rem]">Tomorrow</span>
+			<span class="text-[8rem] -mt-[2rem]">Sunny</span>
+			<div class="flex flex-row items-center -mt-[2rem]">
+				<span class="text-[8rem]">52°</span>
+				<div class="grow h-6 w-full overflow-hidden rounded-full bg-linear-to-l from-[#df8c32] to-[#1c7eca]"></div>
+				<span class="text-[8rem]">76°</span>
+			</div>
+		</div>
+	</div>
+}

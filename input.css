@@ -1,6 +1,25 @@
 @import "tailwindcss";
-@import url("https://fonts.googleapis.com/css2?family=Dosis&display=swap");
 
 @theme {
-    --default-font-family: Oswald, san-serif;
+    --default-font-family: "Oswald", san-serif;
+
+    --color-sunset-orange: #eb7336;
+    --color-sunset-pink: #82526c;
+    --color-sunset-purple: #1f2340;
+
+    --font-clock: "Bebas Neue", sans-serif;
+    --font-date: "Moulpali", sans-serif;
+
+    /*--font-clock: "Ubuntu Condensed", sans-serif;*/
+    /*--font-clock: "Anek Kannada", sans-serif;*/
+    /*--font-clock: "Konkhmer Sleokchher", sans-serif;*/
+    /*--font-clock: "SUSE", sans-serif;*/
+    /*--font-clock: "Chocolate Classical Sans", sans-serif;*/
+    /*--font-clock: "Noto Sans Buhid", sans-serif;*/
+    /*--font-clock: "Noto Sans Gothic", sans-serif;*/
+    /*--font-clock: "Bahianita", sans-serif;*/
+    /*--font-clock: "Moulpali", sans-serif;*/
+    /*--font-clock: "Lisu Bosa", sans-serif;*/
 }
+
+

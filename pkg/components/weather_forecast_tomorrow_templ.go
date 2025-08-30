@@ -8,7 +8,8 @@ package components
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-func clock() templ.Component {
+// TODO vary gradient with temperature
+func weather_forecast_tomorrow() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -29,7 +30,7 @@ func clock() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex flex-col content-between min-w-[690px]\"><div class=\"font-date text-8xl\">Wed Aug 30</div><div class=\"font-clock text-[24rem] leading-[24rem]\">07:06</div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex-1 flex flex-row gap-8 justify-center items-center\"><img src=\"/assets/icons/weather/clear-day.svg\" class=\"h-96\"><div class=\"grow flex flex-col gap-[2rem]\"><span class=\"text-[4rem]\">Tomorrow</span> <span class=\"text-[8rem] -mt-[2rem]\">Sunny</span><div class=\"flex flex-row items-center -mt-[2rem]\"><span class=\"text-[8rem]\">52°</span><div class=\"grow h-6 w-full overflow-hidden rounded-full bg-linear-to-l from-[#df8c32] to-[#1c7eca]\"></div><span class=\"text-[8rem]\">76°</span></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

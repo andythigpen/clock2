@@ -8,6 +8,7 @@ package components
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+// TODO don't use animated icons
 func weather_forecast() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -29,20 +30,7 @@ func weather_forecast() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex-1 flex flex-col\"><div class=\"flex-1 flex flex-row gap-4 justify-center items-center\"><img src=\"/assets/icons/weather/clear-day.svg\" class=\"h-96\"> <span class=\"text-[15rem]\">80<span class=\"text-9xl\">°F</span></span> <span class=\"text-9xl ml-8\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs("@")
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/components/weather_forecast.templ`, Line: 8, Col: 36}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</span> <span class=\"text-[15rem]\">2</span></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!--<div class=\"flex-1 flex flex-col\">\n\t\t<div class=\"flex-1 flex flex-row gap-4 justify-center items-center\">\n\t\t\t<img src=\"/assets/icons/weather/clear-day.svg\" class=\"h-96\"/>\n\t\t\t<span class=\"text-[15rem]\">80<span class=\"text-9xl\">°F</span></span>\n\t\t\t<span class=\"text-9xl ml-8\">{ \"@\" }</span>\n\t\t\t<span class=\"text-[15rem]\">2</span>\n\t\t</div>--><div class=\"flex-1 flex flex-row gap-28 justify-center\"><div class=\"flex flex-col items-center\"><span class=\"flex-1 text-[7rem] leading-[6rem] font-bold\">12<span class=\"text-[4rem]\">PM</span></span> <img src=\"/assets/icons/weather/clear-day.svg\" class=\"flex-1 h-48\"> <span class=\"flex-1 text-[9rem] leading-[8rem]\">80</span></div><div class=\"flex flex-col items-center\"><span class=\"flex-1 text-[7rem] leading-[6rem] font-bold\">1<span class=\"text-[4rem]\">PM</span></span> <img src=\"/assets/icons/weather/clear-day.svg\" class=\"flex-1 h-48\"> <span class=\"flex-1 text-[9rem] leading-[8rem]\">82</span></div><div class=\"flex flex-col items-center\"><span class=\"flex-1 text-[7rem] leading-[6rem] font-bold\">2<span class=\"text-[4rem]\">PM</span></span> <img src=\"/assets/icons/weather/clear-night.svg\" class=\"flex-1 h-48\"> <span class=\"flex-1 text-[9rem] leading-[8rem]\">85</span></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -29,7 +29,7 @@ func weather_current() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex-1 flex flex-row gap-4 justify-center items-center\"><img src=\"/assets/icons/weather/clear-day.svg\" class=\"h-96\"> <span class=\"text-[15rem]\">76<span class=\"text-9xl\">°F</span></span></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex-1 flex flex-row gap-4 justify-center items-center\"><img src=\"/assets/icons/weather/clear-day.svg\" class=\"h-96\"> <span class=\"text-[18rem] leading-[18rem]\">76°</span> <img src=\"/assets/icons/weather/pressure-low.svg\" class=\"h-48 -ml-44 mt-40\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
