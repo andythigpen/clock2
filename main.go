@@ -1,19 +1,55 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/a-h/templ"
+	"github.com/joho/godotenv"
 
 	"github.com/andythigpen/clock2/pkg/components"
+	"github.com/andythigpen/clock2/pkg/services/homeassistant"
 )
 
 func main() {
-	component := components.Index()
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
+	switch strings.ToLower(os.Getenv("LOG_LEVEL")) {
+	case "debug":
+		slog.SetLogLoggerLevel(slog.LevelDebug)
+	case "warning", "warn":
+		slog.SetLogLoggerLevel(slog.LevelWarn)
+	case "error", "err":
+		slog.SetLogLoggerLevel(slog.LevelError)
+	default:
+		slog.SetLogLoggerLevel(slog.LevelInfo)
+	}
+
+	ctx := context.Background()
+
+	haUrl := os.Getenv("HA_URL")
+	haToken := os.Getenv("HA_TOKEN")
+	weatherEntity := os.Getenv("HA_WEATHER_ENTITY")
+	forecastEntity := os.Getenv("HA_FORECAST_ENTITY")
+	sunEntity := os.Getenv("HA_SUN_ENTITY")
+	haSvc := homeassistant.NewHomeAssistantService(
+		haUrl,
+		haToken,
+		homeassistant.WithWeatherEntity(weatherEntity),
+		homeassistant.WithForecastEntity(forecastEntity),
+		homeassistant.WithSunEntity(sunEntity),
+	)
+	go haSvc.RunForever(ctx)
+
+	component := components.Index()
 	mux := http.NewServeMux()
 	mux.Handle("/", templ.Handler(component))
 	mux.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
@@ -23,8 +59,9 @@ func main() {
 		port = "8080"
 	}
 	addr := fmt.Sprintf(":%s", port)
-	slog.Info("Listening", "addr", addr)
+	slog.Info("listening", "addr", addr)
 	if err := http.ListenAndServe(addr, mux); err != nil {
-		slog.Error("Failed to listen", "addr", addr)
+		slog.Error("failed to listen", "addr", addr)
 	}
+	haSvc.Stop()
 }
