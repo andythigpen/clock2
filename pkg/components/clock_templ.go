@@ -29,7 +29,7 @@ func clock() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex flex-col content-between min-w-[690px]\"><div class=\"font-date text-8xl\">Wed Aug 30</div><div class=\"font-clock text-[24rem] leading-[24rem]\">07:06</div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex flex-col content-between min-w-[690px]\"><div id=\"date\" class=\"font-date text-8xl\"></div><div id=\"time\" class=\"font-clock text-[24rem] leading-[24rem]\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
