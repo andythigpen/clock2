@@ -1,6 +1,11 @@
 package weather
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+)
 
 type WeatherCondition string
 
@@ -19,6 +24,20 @@ const (
 	Unknown           WeatherCondition = "unknown"
 	Windy             WeatherCondition = "windy"
 )
+
+func (r WeatherCondition) String() string {
+	switch r {
+	case Exceptional:
+		return "Warning"
+	case PartlyCloudy:
+		return "Partly Cloudy"
+	case ThunderstormsRain:
+		return "Thunderstorms"
+	default:
+		caser := cases.Title(language.AmericanEnglish)
+		return caser.String(string(r))
+	}
+}
 
 func (r *WeatherCondition) UnmarshalJSON(b []byte) error {
 	var s string

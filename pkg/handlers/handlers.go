@@ -16,6 +16,7 @@ func Register(mux *http.ServeMux, haSvc *services.HomeAssistantService) {
 	mux.Handle("/", templ.Handler(component))
 	mux.Handle("/components/weather-current", &WeatherCurrentHandler{svc: haSvc})
 	mux.Handle("/components/weather-forecast", &WeatherForecastHandler{svc: haSvc})
+	mux.Handle("/components/weather-forecast-tomorrow", &WeatherForecastTomorrowHandler{svc: haSvc})
 	mux.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
 }
 
@@ -38,4 +39,14 @@ func (h *WeatherForecastHandler) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	forecast := h.svc.GetForecast()
 	m := view.NewWeatherForecastView(forecast)
 	WeatherForecast(m).Render(context.Background(), w)
+}
+
+type WeatherForecastTomorrowHandler struct {
+	svc *services.HomeAssistantService
+}
+
+func (h *WeatherForecastTomorrowHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	forecast := h.svc.GetForecast()
+	m := view.NewWeatherForecastTomorrowView(forecast)
+	WeatherForecastTomorrow(m).Render(context.Background(), w)
 }

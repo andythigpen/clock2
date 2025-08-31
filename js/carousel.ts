@@ -1,6 +1,7 @@
 const components = [
   // "weather-current",
-  "weather-forecast",
+  // "weather-forecast",
+  "weather-forecast-tomorrow",
 ];
 
 function* carouselGenerator() {

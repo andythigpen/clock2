@@ -2,7 +2,8 @@
   // js/carousel.ts
   var components = [
     // "weather-current",
-    "weather-forecast"
+    // "weather-forecast",
+    "weather-forecast-tomorrow"
   ];
   function* carouselGenerator() {
     let current = 0;

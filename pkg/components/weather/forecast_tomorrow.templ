@@ -1,0 +1,18 @@
+package weather
+
+import "github.com/andythigpen/clock2/pkg/models/view"
+
+// TODO vary gradient with temperature
+templ WeatherForecastTomorrow(model view.WeatherForecastTomorrowView) {
+	<div class="flex-1 flex flex-row gap-8 justify-center items-center">
+		<img src={ model.Icon } class="h-96"/>
+		<div class="grow flex flex-col gap-[2rem]">
+			<span class="text-[8rem]">Tomorrow</span>
+			<div class="flex flex-row items-center -mt-[2rem] gap-4">
+				<span class="text-[8rem]">{ model.TemperatureLo }°</span>
+				<div class="grow h-6 w-full overflow-hidden rounded-full bg-linear-to-l from-[#df8c32] to-[#1c7eca]"></div>
+				<span class="text-[8rem]">{ model.TemperatureHi }°</span>
+			</div>
+		</div>
+	</div>
+}
