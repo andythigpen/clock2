@@ -25,7 +25,7 @@ function formattedMinute(date: Date): string {
 function updateClock() {
   const elDate = document.getElementById("date");
   const elTime = document.getElementById("time");
-  if (elDate == null || elTime == null) {
+  if (elDate === null || elTime === null) {
     return;
   }
   const now = new Date();

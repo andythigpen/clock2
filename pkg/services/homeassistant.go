@@ -1,4 +1,4 @@
-package homeassistant
+package services
 
 import (
 	"context"
@@ -18,7 +18,7 @@ type entityState[T any] struct {
 	state T
 }
 
-type homeAssistantService struct {
+type HomeAssistantService struct {
 	baseUrl  string
 	token    string
 	doneCh   chan bool
@@ -27,28 +27,28 @@ type homeAssistantService struct {
 	sun      entityState[weather.SunEntity]
 }
 
-type HomeAssistantServiceOption func(*homeAssistantService)
+type HomeAssistantServiceOption func(*HomeAssistantService)
 
 func WithWeatherEntity(id string) HomeAssistantServiceOption {
-	return func(r *homeAssistantService) {
+	return func(r *HomeAssistantService) {
 		r.weather.id = id
 	}
 }
 
 func WithForecastEntity(id string) HomeAssistantServiceOption {
-	return func(r *homeAssistantService) {
+	return func(r *HomeAssistantService) {
 		r.forecast.id = id
 	}
 }
 
 func WithSunEntity(id string) HomeAssistantServiceOption {
-	return func(r *homeAssistantService) {
+	return func(r *HomeAssistantService) {
 		r.sun.id = id
 	}
 }
 
-func NewHomeAssistantService(baseUrl, token string, opts ...HomeAssistantServiceOption) homeAssistantService {
-	svc := homeAssistantService{
+func NewHomeAssistantService(baseUrl, token string, opts ...HomeAssistantServiceOption) *HomeAssistantService {
+	svc := HomeAssistantService{
 		baseUrl: baseUrl,
 		token:   token,
 		doneCh:  make(chan bool),
@@ -56,10 +56,10 @@ func NewHomeAssistantService(baseUrl, token string, opts ...HomeAssistantService
 	for _, o := range opts {
 		o(&svc)
 	}
-	return svc
+	return &svc
 }
 
-func (r *homeAssistantService) RunForever(ctx context.Context) {
+func (r *HomeAssistantService) RunForever(ctx context.Context) {
 	slog.Info("running HomeAssistant service")
 	// fetch the initial state
 	r.poll(ctx)
@@ -75,23 +75,23 @@ func (r *homeAssistantService) RunForever(ctx context.Context) {
 	}
 }
 
-func (r *homeAssistantService) Stop() {
+func (r *HomeAssistantService) Stop() {
 	r.doneCh <- true
 }
 
-func (r *homeAssistantService) GetWeather() weather.WeatherEntity {
+func (r *HomeAssistantService) GetWeather() weather.WeatherEntity {
 	return r.weather.state
 }
 
-func (r *homeAssistantService) GetForecast() weather.ForecastEntity {
+func (r *HomeAssistantService) GetForecast() weather.ForecastEntity {
 	return r.forecast.state
 }
 
-func (r *homeAssistantService) GetSun() weather.SunEntity {
+func (r *HomeAssistantService) GetSun() weather.SunEntity {
 	return r.sun.state
 }
 
-func (r *homeAssistantService) poll(ctx context.Context) {
+func (r *HomeAssistantService) poll(ctx context.Context) {
 	if r.weather.id != "" {
 		if err := r.fetchEntity(ctx, r.weather.id, &r.weather.state); err != nil {
 			slog.ErrorContext(ctx, "failed to fetch entity", "entityId", r.weather.id, "err", err)
@@ -111,7 +111,7 @@ func (r *homeAssistantService) poll(ctx context.Context) {
 	}
 }
 
-func (r *homeAssistantService) fetchEntity(ctx context.Context, entityId string, v any) error {
+func (r *HomeAssistantService) fetchEntity(ctx context.Context, entityId string, v any) error {
 	u, err := url.JoinPath(r.baseUrl, "/api/states", entityId)
 	if err != nil {
 		return err

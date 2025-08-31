@@ -9,11 +9,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/a-h/templ"
 	"github.com/joho/godotenv"
 
-	"github.com/andythigpen/clock2/pkg/components"
-	"github.com/andythigpen/clock2/pkg/services/homeassistant"
+	"github.com/andythigpen/clock2/pkg/handlers"
+	"github.com/andythigpen/clock2/pkg/services"
 )
 
 func main() {
@@ -40,19 +39,17 @@ func main() {
 	weatherEntity := os.Getenv("HA_WEATHER_ENTITY")
 	forecastEntity := os.Getenv("HA_FORECAST_ENTITY")
 	sunEntity := os.Getenv("HA_SUN_ENTITY")
-	haSvc := homeassistant.NewHomeAssistantService(
+	haSvc := services.NewHomeAssistantService(
 		haUrl,
 		haToken,
-		homeassistant.WithWeatherEntity(weatherEntity),
-		homeassistant.WithForecastEntity(forecastEntity),
-		homeassistant.WithSunEntity(sunEntity),
+		services.WithWeatherEntity(weatherEntity),
+		services.WithForecastEntity(forecastEntity),
+		services.WithSunEntity(sunEntity),
 	)
 	go haSvc.RunForever(ctx)
 
-	component := components.Index()
 	mux := http.NewServeMux()
-	mux.Handle("/", templ.Handler(component))
-	mux.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
+	handlers.Register(mux, haSvc)
 
 	port := os.Getenv("PORT")
 	if port == "" {

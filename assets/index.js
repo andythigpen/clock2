@@ -1,4 +1,16 @@
 (() => {
+  // js/carousel.ts
+  async function advanceCarousel() {
+    const el = document.getElementById("carousel");
+    if (el === null) {
+      return;
+    }
+    const response = await fetch("/components/weather-current");
+    const html = await response.text();
+    el.innerHTML = html;
+  }
+  setInterval(advanceCarousel, 15e3);
+
   // js/clock.ts
   var locale = "en-US";
   function shortMonth(date) {
@@ -21,7 +33,7 @@
   function updateClock() {
     const elDate = document.getElementById("date");
     const elTime = document.getElementById("time");
-    if (elDate == null || elTime == null) {
+    if (elDate === null || elTime === null) {
       return;
     }
     const now = /* @__PURE__ */ new Date();

@@ -3,7 +3,7 @@ package weather
 import "time"
 
 type WeatherEntity struct {
-	State      string                  `json:"state"`
+	State      WeatherCondition        `json:"state"`
 	Attributes WeatherEntityAttributes `json:"attributes"`
 }
 
