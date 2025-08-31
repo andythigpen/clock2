@@ -25,51 +25,24 @@ func isDay() bool {
 }
 
 func WeatherIconName(condition weather.WeatherCondition) string {
-	name := "unknown"
-	// TODO: just rename the files to match the conditions
+	var name string
+	timeDependent := false
 	switch condition {
-	case weather.Clear:
-		if isDay() {
-			name = "clear-day"
-		} else {
-			name = "clear-night"
-		}
-	case weather.Cloudy:
-		if isDay() {
-			name = "overcast-day"
-		} else {
-			name = "overcast-night"
-		}
+	case weather.Clear, weather.Cloudy, weather.Fog, weather.PartlyCloudy, weather.Thunderstorms, weather.ThunderstormsRain:
+		name = string(condition)
+		timeDependent = true
 	case weather.Exceptional:
 		name = "code-red"
-	case weather.Fog:
-		name = "fog"
-	case weather.PartlyCloudy:
+	case weather.Unknown:
+		name = "code-orange"
+	default:
+		name = string(condition)
+	}
+	if timeDependent {
 		if isDay() {
-			name = "partly-cloudy-day"
-		} else {
-			name = "partly-cloudy-night"
+			return name + "-day"
 		}
-	case weather.Rain:
-		name = "rain"
-	case weather.Sleet:
-		name = "sleet"
-	case weather.Snow:
-		name = "snow"
-	case weather.Thunderstorms:
-		if isDay() {
-			name = "thunderstorms-day"
-		} else {
-			name = "thunderstorms-night"
-		}
-	case weather.ThunderstormsRain:
-		if isDay() {
-			name = "thunderstorms-day-rain"
-		} else {
-			name = "thunderstorms-night-rain"
-		}
-	case weather.Windy:
-		name = "wind"
+		return name + "-night"
 	}
 	return name
 }
