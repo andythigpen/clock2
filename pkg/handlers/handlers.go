@@ -14,11 +14,11 @@ func Register(mux *http.ServeMux, haSvc *services.HomeAssistantService) {
 	mux.Handle("/", templ.Handler(component))
 	mux.Handle("/carousel", &CarouselHandler{
 		widgets: []Widget{
-			&WeatherCurrentWidget{svc: haSvc},
-			&WeatherForecastWidget{svc: haSvc},
-			&WeatherForecastTomorrowWidget{svc: haSvc},
+			// &WeatherCurrentWidget{svc: haSvc},
+			// &WeatherForecastWidget{svc: haSvc},
+			&WeatherPrecipitationWidget{svc: haSvc},
+			// &WeatherForecastTomorrowWidget{svc: haSvc},
 			// TODO: humidity
-			// TODO: precipitation
 			// TODO: sun
 		},
 	})

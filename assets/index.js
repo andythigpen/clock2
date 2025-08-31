@@ -13,7 +13,6 @@
     await new Promise((resolve) => setTimeout(resolve, 700));
     el.classList.remove("opacity-0");
   }
-  setInterval(advanceCarousel, 15e3);
   globalThis.initCarousel = function() {
     if (globalThis.initCarousel.initialized) {
       return;
