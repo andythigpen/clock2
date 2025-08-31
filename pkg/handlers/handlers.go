@@ -6,47 +6,42 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/andythigpen/clock2/pkg/components"
-	. "github.com/andythigpen/clock2/pkg/components/weather"
-	"github.com/andythigpen/clock2/pkg/models/view"
 	"github.com/andythigpen/clock2/pkg/services"
 )
 
 func Register(mux *http.ServeMux, haSvc *services.HomeAssistantService) {
 	component := components.Index()
 	mux.Handle("/", templ.Handler(component))
-	mux.Handle("/components/weather-current", &WeatherCurrentHandler{svc: haSvc})
-	mux.Handle("/components/weather-forecast", &WeatherForecastHandler{svc: haSvc})
-	mux.Handle("/components/weather-forecast-tomorrow", &WeatherForecastTomorrowHandler{svc: haSvc})
+	mux.Handle("/carousel", &CarouselHandler{
+		widgets: []Widget{
+			&WeatherCurrentWidget{svc: haSvc},
+			&WeatherForecastWidget{svc: haSvc},
+			&WeatherForecastTomorrowWidget{svc: haSvc},
+			// TODO: humidity
+			// TODO: precipitation
+			// TODO: sun
+		},
+	})
 	mux.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("assets"))))
 }
 
-type WeatherCurrentHandler struct {
-	svc *services.HomeAssistantService
+type CarouselHandler struct {
+	widgets []Widget
+	cursor  int
 }
 
-func (h *WeatherCurrentHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	weather := h.svc.GetWeather()
-	forecast := h.svc.GetForecast()
-	m := view.NewWeatherCurrentView(weather, forecast)
-	WeatherCurrent(m).Render(context.Background(), w)
-}
-
-type WeatherForecastHandler struct {
-	svc *services.HomeAssistantService
-}
-
-func (h *WeatherForecastHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	forecast := h.svc.GetForecast()
-	m := view.NewWeatherForecastView(forecast)
-	WeatherForecast(m).Render(context.Background(), w)
-}
-
-type WeatherForecastTomorrowHandler struct {
-	svc *services.HomeAssistantService
-}
-
-func (h *WeatherForecastTomorrowHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	forecast := h.svc.GetForecast()
-	m := view.NewWeatherForecastTomorrowView(forecast)
-	WeatherForecastTomorrow(m).Render(context.Background(), w)
+func (h *CarouselHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+	for range len(h.widgets) {
+		idx := h.cursor
+		h.cursor += 1
+		if h.cursor >= len(h.widgets) {
+			h.cursor = 0
+		}
+		widget := h.widgets[idx]
+		if widget.ShouldDisplay() {
+			widget.Render(ctx, w)
+			break
+		}
+	}
 }
