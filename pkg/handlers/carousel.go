@@ -4,11 +4,12 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/andythigpen/clock2/pkg/handlers/widgets"
 	"github.com/andythigpen/clock2/pkg/services"
 )
 
 type CarouselHandler struct {
-	widgets []Widget
+	widgets []widgets.Widget
 	cursor  int
 }
 
@@ -30,13 +31,13 @@ func (h *CarouselHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func NewCarouselHandler(svc *services.HomeAssistantService) *CarouselHandler {
 	return &CarouselHandler{
-		widgets: []Widget{
-			&WeatherCurrentWidget{svc: svc},
-			&WeatherForecastWidget{svc: svc},
-			&WeatherPrecipitationWidget{svc: svc},
-			&WeatherHumidityWidget{svc: svc},
-			&SunWidget{svc: svc},
-			&WeatherForecastTomorrowWidget{svc: svc},
+		widgets: []widgets.Widget{
+			widgets.NewWeatherCurrentWidget(svc),
+			widgets.NewWeatherForecastWidget(svc),
+			widgets.NewWeatherPrecipitationWidget(svc),
+			widgets.NewWeatherHumidityWidget(svc),
+			widgets.NewSunWidget(svc),
+			widgets.NewWeatherForecastTomorrowWidget(svc),
 		},
 	}
 }
