@@ -1,2 +1,2 @@
-import "./carousel";
+export * from "./carousel";
 import "./clock";

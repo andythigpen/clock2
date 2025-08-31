@@ -39,3 +39,11 @@ function updateClock() {
 }
 
 setInterval(updateClock, 1000);
+
+globalThis.initClock = function () {
+  if (globalThis.initClock.initialized) {
+    return;
+  }
+  globalThis.initClock.initialized = true;
+  updateClock();
+};

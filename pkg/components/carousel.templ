@@ -1,14 +1,8 @@
 package components
 
-var classes = []string{"flex", "flex-1", "transition", "duration-700"}
-
 templ carousel() {
-	<div id="carousel" class={ classes }>
-		<!-- @weather_current() -->
-		<!-- @weather_forecast() -->
-		<!-- @weather_humidity() -->
-		<!-- @weather_precipitation() -->
-		<!-- @sun() -->
-		<!-- @weather_forecast_tomorrow() -->
-	</div>
+	<div id="carousel" class={ "flex", "flex-1", "transition", "duration-700" }></div>
+	<script>
+		initCarousel();
+	</script>
 }

@@ -35,7 +35,7 @@ func NewWeatherCurrentView(weather weather.WeatherEntity, forecast weather.Forec
 		break
 	}
 	return WeatherCurrentView{
-		IconSrc:                  AssetIconWeather(WeatherIconName(weather.State)),
+		IconSrc:                  AssetIconWeather(WeatherConditionIcon(weather.State)),
 		Temperature:              strconv.Itoa(int(currentTemperature)),
 		TemperatureDirectionIcon: AssetIconWeather(fmt.Sprintf("pressure-%s", direction), Animated()),
 		DisplayDirection:         displayDirection,

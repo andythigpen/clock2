@@ -24,7 +24,7 @@ func isDay() bool {
 	return hour >= 6 && hour <= 19
 }
 
-func WeatherIconName(condition weather.WeatherCondition) string {
+func WeatherConditionIcon(condition weather.WeatherCondition) string {
 	var name string
 	timeDependent := false
 	switch condition {
