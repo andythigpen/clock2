@@ -12,7 +12,7 @@ async function advanceCarousel() {
   el.classList.remove("opacity-0");
 }
 
-// setInterval(advanceCarousel, 15000);
+setInterval(advanceCarousel, 15000);
 
 globalThis.initCarousel = function () {
   if (globalThis.initCarousel.initialized) {

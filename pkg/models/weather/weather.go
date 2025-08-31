@@ -32,7 +32,7 @@ type SunEntity struct {
 }
 
 type SunEntityAttributes struct {
-	Rising      bool   `json:"rising"`
-	NextRising  string `json:"next_rising"`
-	NextSetting string `json:"next_setting"`
+	Rising      bool      `json:"rising"`
+	NextRising  time.Time `json:"next_rising"`
+	NextSetting time.Time `json:"next_setting"`
 }

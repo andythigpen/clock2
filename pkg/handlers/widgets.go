@@ -62,7 +62,7 @@ func (r *WeatherForecastTomorrowWidget) Render(ctx context.Context, w io.Writer)
 }
 
 func (r *WeatherForecastTomorrowWidget) ShouldDisplay() bool {
-	return true
+	return time.Now().Hour() >= 17
 }
 
 type WeatherPrecipitationWidget struct {
@@ -104,4 +104,42 @@ func (r *WeatherPrecipitationWidget) ShouldDisplay() bool {
 		return true
 	}
 	return false
+}
+
+type SunWidget struct {
+	svc *services.HomeAssistantService
+}
+
+var _ Widget = (*SunWidget)(nil)
+
+func (r *SunWidget) Render(ctx context.Context, w io.Writer) {
+	sun := r.svc.GetSun()
+	m := view.NewSunView(sun)
+	Sun(m).Render(ctx, w)
+}
+
+func (r *SunWidget) ShouldDisplay() bool {
+	sun := r.svc.GetSun()
+	if sun.Attributes.NextRising.Before(time.Now().Add(2 * time.Hour)) {
+		return true
+	} else if sun.Attributes.NextSetting.Before(time.Now().Add(2 * time.Hour)) {
+		return true
+	}
+	return false
+}
+
+type WeatherHumidityWidget struct {
+	svc *services.HomeAssistantService
+}
+
+var _ Widget = (*WeatherHumidityWidget)(nil)
+
+func (r *WeatherHumidityWidget) Render(ctx context.Context, w io.Writer) {
+	current := r.svc.GetWeather()
+	m := view.NewWeatherHumidityView(current)
+	WeatherHumidity(m).Render(ctx, w)
+}
+
+func (r *WeatherHumidityWidget) ShouldDisplay() bool {
+	return true
 }
