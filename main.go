@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"embed"
 	"fmt"
 	"log"
 	"log/slog"
@@ -15,6 +16,9 @@ import (
 	"github.com/andythigpen/clock2/pkg/handlers"
 	"github.com/andythigpen/clock2/pkg/services"
 )
+
+//go:embed assets/*
+var assets embed.FS
 
 func makeHomeAssistant(ctx context.Context) *services.HomeAssistantService {
 	haUrl := os.Getenv("HA_URL")
@@ -84,7 +88,7 @@ func main() {
 	displaySvc := makeDisplayService()
 
 	mux := http.NewServeMux()
-	handlers.Register(mux, haSvc, displaySvc)
+	handlers.Register(mux, haSvc, displaySvc, assets)
 
 	port := os.Getenv("PORT")
 	if port == "" {
