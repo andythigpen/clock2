@@ -21,4 +21,5 @@ func Register(
 	mux.Handle("/assets/", http.FileServer(http.FS(assets)))
 	mux.Handle("/api/display/state", NewDisplayStateHandler(displaySvc))
 	mux.Handle("/api/display/brightness", NewDisplayBrightnessHandler())
+	mux.Handle("/api/sun", NewSunHandler(haSvc))
 }

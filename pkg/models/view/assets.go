@@ -33,7 +33,7 @@ func WeatherConditionIcon(condition weather.WeatherCondition) string {
 		timeDependent = true
 	case weather.Exceptional:
 		name = "code-red"
-	case weather.Unknown:
+	case weather.Unknown, "":
 		name = "code-orange"
 	default:
 		name = string(condition)

@@ -8,25 +8,15 @@ package components
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-// evening/morning - vary percentage
-// "bg-linear-to-t from-[#734c67] via-[#313862] via-30% to-[#011b32] to-76%",
-// day vary color
-// "bg-linear-to-t from-[#4c6b73] via-[#313862] via-30% to-[#011b32] to-76%",
-// night
-// "bg-linear-to-t from-[#150d0d] to-black to-45%"
-
 var homeClasses = []string{
 	"flex",
-	//"items-center",
-	//"justify-center",
 	"h-screen",
 	"w-screen",
 	"p-6",
 	"gap-16",
-	"bg-linear-to-t from-[#4c6b73] via-[#313862] via-30% to-[#011b32] to-76%",
-	//"bg-linear-to-t from-[#734c67] via-[#313862] via-30% to-[#011b32] to-76%",
-	//"bg-linear-to-t from-[#0f0a3b] to-[#0a0a0f] to-45%",
-	"transition-1000",
+	"bg-linear-to-t from-[#150d0d] via-[#000000] via-60% to-[#000000] to-100%",
+	"transition-[background-color,--tw-gradient-to-position,--tw-gradient-via-position,--tw-gradient-from,--tw-gradient-via,--tw-gradient-to]",
+	"duration-15000",
 }
 
 func home() templ.Component {
@@ -55,7 +45,7 @@ func home() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"home\" class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -80,7 +70,7 @@ func home() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><script>\n\t\tinitHome();\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
