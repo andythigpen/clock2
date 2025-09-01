@@ -14,6 +14,9 @@ function formattedDay(date: Date): string {
 
 function formattedHour(date: Date): string {
   const hour = date.getHours() % 12;
+  if (hour == 0) {
+    return "12";
+  }
   return hour.toString().padStart(2, "0");
 }
 

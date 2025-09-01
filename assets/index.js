@@ -35,6 +35,9 @@
   }
   function formattedHour(date) {
     const hour = date.getHours() % 12;
+    if (hour == 0) {
+      return "12";
+    }
     return hour.toString().padStart(2, "0");
   }
   function formattedMinute(date) {
