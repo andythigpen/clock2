@@ -38,12 +38,11 @@ function updateClock() {
   elTime.innerHTML = `${hour}:${min}`;
 }
 
-setInterval(updateClock, 1000);
-
 globalThis.initClock = function () {
   if (globalThis.initClock.initialized) {
     return;
   }
   globalThis.initClock.initialized = true;
   updateClock();
+  setInterval(updateClock, 1000);
 };

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 
 	"github.com/andythigpen/clock2/pkg/handlers/widgets"
@@ -9,11 +10,24 @@ import (
 )
 
 type CarouselHandler struct {
-	widgets []widgets.Widget
-	cursor  int
+	displaySvc *services.DisplayService
+	widgets    []widgets.Widget
+	cursor     int
 }
 
 func (h *CarouselHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	state, err := h.displaySvc.GetState()
+	if err != nil {
+		slog.Error("failed to get display state", "err", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if state == services.DisplayStateOff {
+		// don't show anything when the display is off
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	ctx := context.Background()
 	for range len(h.widgets) {
 		idx := h.cursor
@@ -29,15 +43,16 @@ func (h *CarouselHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewCarouselHandler(svc *services.HomeAssistantService) *CarouselHandler {
+func NewCarouselHandler(haSvc *services.HomeAssistantService, displaySvc *services.DisplayService) *CarouselHandler {
 	return &CarouselHandler{
+		displaySvc: displaySvc,
 		widgets: []widgets.Widget{
-			widgets.NewWeatherCurrentWidget(svc),
-			widgets.NewWeatherForecastWidget(svc),
-			widgets.NewWeatherPrecipitationWidget(svc),
-			widgets.NewWeatherHumidityWidget(svc),
-			widgets.NewSunWidget(svc),
-			widgets.NewWeatherForecastTomorrowWidget(svc),
+			widgets.NewWeatherCurrentWidget(haSvc),
+			widgets.NewWeatherForecastWidget(haSvc),
+			widgets.NewWeatherPrecipitationWidget(haSvc),
+			widgets.NewWeatherHumidityWidget(haSvc),
+			widgets.NewSunWidget(haSvc),
+			widgets.NewWeatherForecastTomorrowWidget(haSvc),
 		},
 	}
 }

@@ -29,7 +29,7 @@ func overlay() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"fixed top-0 left-0 bottom-0 right-0 bg-[#000000] z-50 transition duration-[5000ms] opacity-0\"></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"overlay\" class=\"fixed top-0 left-0 bottom-0 right-0 bg-[#000000] z-50 transition duration-[5000ms] opacity-0\"></div><script>\n\t\tinitOverlay();\n\t</script>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
