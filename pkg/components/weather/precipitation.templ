@@ -3,12 +3,15 @@ package weather
 import "github.com/andythigpen/clock2/pkg/models/view"
 
 templ WeatherPrecipitation(model view.WeatherPrecipitationView) {
-	<div class="flex-1 flex flex-row justify-center items-stretch">
-		<img src={ model.Icon } class="h-96"/>
-		<div class="flex flex-col flex-1">
-			<span class="text-[6rem] text-center">{ model.Hour }<span class="text-[4rem]">{ model.AmPm }</span></span>
-			<span class="grow text-[8rem] leading-[8rem]">{ model.PrecipitationType }</span>
-			<span class="text-[6rem]">{ model.Percent }<span class="text-[3rem]">%</span> </span>
+	<div class="flex-1 flex flex-row gap-32 justify-center items-center mt-[1rem]">
+		<div class="relative">
+			<span class="absolute z-0 top-[0rem] right-[1rem] text-white/50 text-[9rem] font-bold">
+				{ model.Hour }
+			</span>
+			<img src={ model.Icon } class="relative z-1 h-96"/>
+		</div>
+		<div>
+			<span class="text-[16rem] leading-[16rem]">{ model.Percent }<span class="text-[6rem]">%</span></span>
 		</div>
 	</div>
 }

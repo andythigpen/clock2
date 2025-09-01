@@ -7,23 +7,15 @@ import (
 )
 
 type WeatherPrecipitationView struct {
-	Icon              string
-	Hour              string
-	AmPm              string
-	Percent           string
-	PrecipitationType string
+	Icon    string
+	Hour    string
+	Percent string
 }
 
 func NewWeatherPrecipitationView(forecast weather.Forecast) WeatherPrecipitationView {
-	ampm := "AM"
-	if forecast.DateTime.Hour() >= 12 {
-		ampm = "PM"
-	}
 	return WeatherPrecipitationView{
-		Icon:              AssetIconWeather(WeatherConditionIcon(forecast.Condition), Animated()),
-		Hour:              forecast.DateTime.Format("03"),
-		AmPm:              ampm,
-		Percent:           strconv.Itoa(int(forecast.PrecipitationProbability)),
-		PrecipitationType: forecast.Condition.String(),
+		Icon:    AssetIconWeather(WeatherConditionIcon(forecast.Condition), Animated()),
+		Hour:    forecast.DateTime.Format("03"),
+		Percent: strconv.Itoa(int(forecast.PrecipitationProbability)),
 	}
 }

@@ -44,6 +44,8 @@
     const min = date.getMinutes();
     return min.toString().padStart(2, "0");
   }
+  var prevDate;
+  var prevTime;
   function updateClock() {
     const elDate = document.getElementById("date");
     const elTime = document.getElementById("time");
@@ -56,8 +58,16 @@
     const day = formattedDay(now);
     const hour = formattedHour(now);
     const min = formattedMinute(now);
-    elDate.innerHTML = `${weekday} ${month} ${day}`;
-    elTime.innerHTML = `${hour}:${min}`;
+    const date = `${weekday} ${month} ${day}`;
+    const time = `${hour}:${min}`;
+    if (date !== prevDate) {
+      elDate.innerHTML = date;
+    }
+    if (time !== prevTime) {
+      elTime.innerHTML = time;
+    }
+    prevDate = date;
+    prevTime = time;
   }
   globalThis.initClock = function() {
     if (globalThis.initClock.initialized) {

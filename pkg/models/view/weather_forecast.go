@@ -9,7 +9,6 @@ import (
 
 type ForecastHour struct {
 	Hour        string
-	AmPm        string
 	Icon        string
 	Temperature string
 }
@@ -22,13 +21,8 @@ func NewWeatherForecastView(forecast weather.ForecastEntity) WeatherForecastView
 	hours := []ForecastHour{}
 	for _, hour := range forecast.Attributes.Forecast {
 		if hour.DateTime.After(time.Now()) {
-			ampm := "AM"
-			if hour.DateTime.Hour() >= 12 {
-				ampm = "PM"
-			}
 			hours = append(hours, ForecastHour{
 				Hour:        hour.DateTime.Format("03"),
-				AmPm:        ampm,
 				Icon:        AssetIconWeather(WeatherConditionIcon(hour.Condition)),
 				Temperature: strconv.Itoa(int(hour.Temperature)),
 			})
