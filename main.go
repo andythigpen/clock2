@@ -3,18 +3,21 @@ package main
 import (
 	"context"
 	"embed"
-	"fmt"
+
+	// "fmt"
 	"log"
 	"log/slog"
-	"net/http"
+
+	// "net/http"
 	"os"
 	"regexp"
 	"strings"
 
 	"github.com/joho/godotenv"
 
-	"github.com/andythigpen/clock2/pkg/handlers"
+	// "github.com/andythigpen/clock2/pkg/handlers"
 	"github.com/andythigpen/clock2/pkg/services"
+	"github.com/andythigpen/clock2/pkg/ui"
 )
 
 //go:embed assets/*
@@ -83,21 +86,23 @@ func main() {
 		slog.SetLogLoggerLevel(slog.LevelInfo)
 	}
 
-	ctx := context.Background()
-	haSvc := makeHomeAssistant(ctx)
-	displaySvc := makeDisplayService()
+	ui.RunForever()
 
-	mux := http.NewServeMux()
-	handlers.Register(mux, haSvc, displaySvc, assets)
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-	addr := fmt.Sprintf(":%s", port)
-	slog.Info("listening", "addr", addr)
-	if err := http.ListenAndServe(addr, mux); err != nil {
-		slog.Error("failed to listen", "addr", addr)
-	}
-	haSvc.Stop()
+	// ctx := context.Background()
+	// haSvc := makeHomeAssistant(ctx)
+	// displaySvc := makeDisplayService()
+	//
+	// mux := http.NewServeMux()
+	// handlers.Register(mux, haSvc, displaySvc, assets)
+	//
+	// port := os.Getenv("PORT")
+	// if port == "" {
+	// 	port = "8080"
+	// }
+	// addr := fmt.Sprintf(":%s", port)
+	// slog.Info("listening", "addr", addr)
+	// if err := http.ListenAndServe(addr, mux); err != nil {
+	// 	slog.Error("failed to listen", "addr", addr)
+	// }
+	// haSvc.Stop()
 }
