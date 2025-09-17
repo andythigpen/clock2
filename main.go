@@ -3,11 +3,10 @@ package main
 import (
 	"context"
 	"embed"
-
+	"flag"
 	// "fmt"
 	"log"
 	"log/slog"
-
 	// "net/http"
 	"os"
 	"regexp"
@@ -85,6 +84,8 @@ func main() {
 	default:
 		slog.SetLogLoggerLevel(slog.LevelInfo)
 	}
+
+	flag.Parse()
 
 	ui.RunForever()
 
