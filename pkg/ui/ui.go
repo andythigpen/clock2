@@ -14,7 +14,7 @@ var (
 	frame uint64 = 0
 )
 
-func drawWidget(widget widgets.Widget, a uint8) {
+func drawWidget(widget widgets.Widget) {
 	texture := widget.Texture()
 	rl.DrawTexturePro(
 		texture,
@@ -22,7 +22,7 @@ func drawWidget(widget widgets.Widget, a uint8) {
 		rl.NewRectangle(widget.GetX(), widget.GetY(), float32(texture.Width), float32(texture.Height)),
 		rl.NewVector2(0, 0),
 		0,
-		rl.NewColor(255, 255, 255, a),
+		rl.White,
 	)
 }
 
@@ -38,9 +38,11 @@ func RunForever(haSvc *services.HomeAssistantService) {
 	grid := widgets.NewGrid(platform.WindowWidth, platform.WindowHeight)
 	clock := widgets.NewClock(0, 0, platform.ClockWidth, platform.WindowHeight)
 	carouselWidth := int32(platform.WindowWidth - platform.ClockWidth)
-	carousel := widgets.NewCarousel(platform.ClockWidth, 0,
-		widgets.NewWeatherCurrent(carouselWidth, platform.WindowHeight, haSvc),
-		widgets.NewWeatherForecast(carouselWidth, platform.WindowHeight, haSvc),
+	carouselHeight := int32(platform.WindowHeight)
+	carousel := widgets.NewCarousel(
+		platform.ClockWidth, 0, carouselWidth, platform.WindowHeight,
+		widgets.NewWeatherCurrent(carouselWidth, carouselHeight, haSvc),
+		widgets.NewWeatherForecast(carouselWidth, carouselHeight, haSvc),
 	)
 	// ordering matches the render order from back to front
 	allWidgets := []widgets.Widget{background, grid, clock, carousel}
@@ -58,13 +60,9 @@ func RunForever(haSvc *services.HomeAssistantService) {
 
 		// render all textures to a single texture that can be rotated on the actual display
 		rl.BeginTextureMode(texture)
-		for idx, w := range allWidgets {
+		for _, w := range allWidgets {
 			if w.ShouldDisplay() {
-				a := uint8(255)
-				if idx == 3 {
-					a = uint8(rl.Remap(float32(frame%300), 0, 600, 0, 255))
-				}
-				drawWidget(w, a)
+				drawWidget(w)
 			}
 		}
 		rl.EndTextureMode()

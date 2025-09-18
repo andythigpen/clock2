@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 
+	"github.com/andythigpen/clock2/pkg/platform"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -21,11 +22,12 @@ func (g *grid) RenderTexture(ctx context.Context) {
 	defer rl.EndTextureMode()
 
 	color := rl.Red
+	colorAlternate := rl.Green
 	width := g.texture.Texture.Width
 	height := g.texture.Texture.Height
 
 	// outer margins
-	margin := int32(20)
+	margin := int32(platform.Margin)
 	// left
 	rl.DrawLine(0, margin, width, margin, color)
 	// right
@@ -49,6 +51,8 @@ func (g *grid) RenderTexture(ctx context.Context) {
 	rl.DrawLine(clockWidth+margin+(carouselWidth/2), 0, clockWidth+margin+(carouselWidth/2), height, color)
 	rl.DrawLine(clockWidth+margin+(carouselWidth/4), 0, clockWidth+margin+(carouselWidth/4), height, color)
 	rl.DrawLine(clockWidth+margin+(carouselWidth*3/4), 0, clockWidth+margin+(carouselWidth*3/4), height, color)
+	rl.DrawLine(clockWidth+margin+(carouselWidth/3), 0, clockWidth+margin+(carouselWidth/3), height, colorAlternate)
+	rl.DrawLine(clockWidth+margin+(carouselWidth*2/3), 0, clockWidth+margin+(carouselWidth*2/3), height, colorAlternate)
 }
 
 func (g *grid) ShouldDisplay() bool {

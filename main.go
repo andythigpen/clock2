@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"embed"
+	// "embed"
 	"flag"
 	// "fmt"
 	"log"
@@ -19,8 +19,8 @@ import (
 	"github.com/andythigpen/clock2/pkg/ui"
 )
 
-//go:embed assets/*
-var assets embed.FS
+////go:embed assets/*
+// var assets embed.FS
 
 func makeHomeAssistant(ctx context.Context) *services.HomeAssistantService {
 	haUrl := os.Getenv("HA_URL")
