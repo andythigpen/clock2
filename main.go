@@ -87,12 +87,12 @@ func main() {
 
 	flag.Parse()
 
-	ui.RunForever()
-
-	// ctx := context.Background()
-	// haSvc := makeHomeAssistant(ctx)
+	ctx := context.Background()
+	haSvc := makeHomeAssistant(ctx)
 	// displaySvc := makeDisplayService()
-	//
+
+	ui.RunForever(haSvc)
+
 	// mux := http.NewServeMux()
 	// handlers.Register(mux, haSvc, displaySvc, assets)
 	//

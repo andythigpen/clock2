@@ -2,108 +2,67 @@ package ui
 
 import (
 	"context"
-	"flag"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 
 	"github.com/andythigpen/clock2/pkg/platform"
+	"github.com/andythigpen/clock2/pkg/services"
 	"github.com/andythigpen/clock2/pkg/ui/widgets"
 )
 
 var (
 	frame uint64 = 0
-
-	// debugging flags
-	uiGrid = flag.Bool("ui-grid", false, "display UI grid lines")
 )
 
-func drawBackground() {
-	// #4c6b73
-	bottom := rl.NewColor(76, 107, 115, 255)
-	// #313862
-	via := rl.NewColor(49, 56, 98, 255)
-	// #011b32
-	top := rl.NewColor(1, 27, 50, 255)
-	// 288.0
-	viaPosition := float32(platform.WindowHeight) * 0.6
-	// viaPosition := float32(platform.WindowHeight) * float32(frame%600) / 100.0
-	rl.DrawRectangleGradientEx(
-		rl.NewRectangle(0, 0, platform.WindowWidth, viaPosition),
-		top,
-		via,
-		via,
-		top,
-	)
-	rl.DrawRectangleGradientEx(
-		rl.NewRectangle(0, viaPosition, platform.WindowWidth, platform.WindowHeight-viaPosition),
-		via,
-		bottom,
-		bottom,
-		via,
+func drawWidget(widget widgets.Widget) {
+	texture := widget.Texture()
+	rl.DrawTexturePro(
+		texture,
+		rl.NewRectangle(0, 0, float32(texture.Width), -float32(texture.Height)),
+		rl.NewRectangle(widget.GetX(), widget.GetY(), float32(texture.Width), float32(texture.Height)),
+		rl.NewVector2(0, 0),
+		0,
+		rl.White,
 	)
 }
 
-func drawLayoutGrid() {
-	color := rl.Red
-
-	// outer margins
-	margin := int32(20)
-	// left
-	rl.DrawLine(0, margin, platform.WindowWidth, margin, color)
-	// right
-	rl.DrawLine(0, platform.WindowHeight-margin, platform.WindowWidth, platform.WindowHeight-margin, color)
-	// top
-	rl.DrawLine(margin, 0, margin, platform.WindowHeight, color)
-	// bottom
-	rl.DrawLine(platform.WindowWidth-margin, 0, platform.WindowWidth-margin, platform.WindowHeight, color)
-
-	// clock / date
-	clockWidth := int32(800)
-	rl.DrawLine(clockWidth-margin, 0, clockWidth-margin, platform.WindowHeight, color)
-	rl.DrawLine(clockWidth, 0, clockWidth, platform.WindowHeight, color)
-	rl.DrawLine(clockWidth+margin, 0, clockWidth+margin, platform.WindowHeight, color)
-	rl.DrawLine(400, 0, 400, platform.WindowHeight, color)
-	rl.DrawLine(0, 100, platform.WindowWidth, 100, color)
-	rl.DrawLine(0, platform.WindowHeight-100, platform.WindowWidth, platform.WindowHeight-100, color)
-
-	// right carousel
-	carouselWidth := platform.WindowWidth - clockWidth - (2 * margin)
-	rl.DrawLine(clockWidth+margin+(carouselWidth/2), 0, clockWidth+margin+(carouselWidth/2), platform.WindowHeight, color)
-	rl.DrawLine(clockWidth+margin+(carouselWidth/4), 0, clockWidth+margin+(carouselWidth/4), platform.WindowHeight, color)
-	rl.DrawLine(clockWidth+margin+(carouselWidth*3/4), 0, clockWidth+margin+(carouselWidth*3/4), platform.WindowHeight, color)
-}
-
-func drawTemperature(font rl.Font) {
-	pos := rl.NewVector2(800, 0)
-	rl.DrawTextEx(font, "88°", pos, float32(font.BaseSize), -16.0, rl.White)
-	// TODO draw images
-	// TODO test animated images
-}
-
-func RunForever() {
+func RunForever(haSvc *services.HomeAssistantService) {
 	rl.InitWindow(platform.ScreenWidth, platform.ScreenHeight, "clock")
 	defer rl.CloseWindow()
 
 	rl.SetTargetFPS(60)
 
 	texture := rl.LoadRenderTexture(platform.WindowWidth, platform.WindowHeight)
-	fontDefault := rl.LoadFontEx("assets/fonts/Oswald-Regular.ttf", 500, []rune{'8', '8', '°'})
 
-	clock := widgets.NewClock()
-	clock.Initialize()
+	background := widgets.NewBackground(0, 0, platform.WindowWidth, platform.WindowHeight)
+	grid := widgets.NewGrid(platform.WindowWidth, platform.WindowHeight)
+	clock := widgets.NewClock(0, 0, platform.ClockWidth, platform.WindowHeight)
+	carouselWidth := int32(platform.WindowWidth - platform.ClockWidth)
+	carousel := widgets.NewCarousel(platform.ClockWidth, 0,
+		widgets.NewWeatherCurrent(carouselWidth, platform.WindowHeight, haSvc),
+	)
+	// ordering matches the render order from back to front
+	allWidgets := []widgets.Widget{background, grid, clock, carousel}
 
 	for !rl.WindowShouldClose() {
 		frame += 1
 		ctx := context.WithValue(context.Background(), widgets.KeyFrame, frame)
 		rl.BeginDrawing()
 
-		rl.BeginTextureMode(texture)
-		drawBackground()
-		if *uiGrid {
-			drawLayoutGrid()
+		// render widgets to textures first
+		for _, w := range allWidgets {
+			if w.ShouldDisplay() {
+				w.RenderTexture(ctx)
+			}
 		}
-		clock.Render(ctx, 0, 0, platform.ClockWidth, platform.WindowHeight)
-		drawTemperature(fontDefault)
+
+		// render all textures to a single texture that can be rotated on the actual display
+		rl.BeginTextureMode(texture)
+		for _, w := range allWidgets {
+			if w.ShouldDisplay() {
+				drawWidget(w)
+			}
+		}
 		rl.EndTextureMode()
 
 		var (
