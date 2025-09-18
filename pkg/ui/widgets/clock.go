@@ -30,7 +30,7 @@ func (c *clock) RenderTexture(ctx context.Context) {
 
 	var display string
 	if *uiTestClock {
-		currentTime := ctx.Value(KeyFrame).(uint64) % 5184000 // 60 FPS * 60s * 60m * 24h
+		currentTime := ctx.Value(KeyFrame).(uint64) % (platform.FPS * 60 * 60 * 24)
 		hour := (currentTime / 60 % 12) + 1
 		minute := currentTime / 20 % 60
 		display = fmt.Sprintf("%02d:%02d", hour, minute)

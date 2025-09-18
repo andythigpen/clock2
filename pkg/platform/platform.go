@@ -5,6 +5,8 @@ const (
 	Margin       = 20
 	WindowWidth  = 1920
 	WindowHeight = 480
+
+	FPS = 60
 )
 
 const (

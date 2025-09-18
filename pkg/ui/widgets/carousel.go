@@ -2,6 +2,8 @@ package widgets
 
 import (
 	"context"
+
+	"github.com/andythigpen/clock2/pkg/platform"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -17,6 +19,14 @@ func (c *carousel) currentWidget() Widget {
 }
 
 func (c *carousel) RenderTexture(ctx context.Context) {
+	frame := ctx.Value(KeyFrame).(uint64)
+	// swap every 15s
+	if frame%(platform.FPS*15) == 0 {
+		c.index += 1
+		if c.index >= len(c.widgets) {
+			c.index = 0
+		}
+	}
 	widget := c.currentWidget()
 	widget.RenderTexture(ctx)
 }

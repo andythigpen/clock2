@@ -14,7 +14,7 @@ var (
 	frame uint64 = 0
 )
 
-func drawWidget(widget widgets.Widget) {
+func drawWidget(widget widgets.Widget, a uint8) {
 	texture := widget.Texture()
 	rl.DrawTexturePro(
 		texture,
@@ -22,7 +22,7 @@ func drawWidget(widget widgets.Widget) {
 		rl.NewRectangle(widget.GetX(), widget.GetY(), float32(texture.Width), float32(texture.Height)),
 		rl.NewVector2(0, 0),
 		0,
-		rl.White,
+		rl.NewColor(255, 255, 255, a),
 	)
 }
 
@@ -30,7 +30,7 @@ func RunForever(haSvc *services.HomeAssistantService) {
 	rl.InitWindow(platform.ScreenWidth, platform.ScreenHeight, "clock")
 	defer rl.CloseWindow()
 
-	rl.SetTargetFPS(60)
+	rl.SetTargetFPS(platform.FPS)
 
 	texture := rl.LoadRenderTexture(platform.WindowWidth, platform.WindowHeight)
 
@@ -40,6 +40,7 @@ func RunForever(haSvc *services.HomeAssistantService) {
 	carouselWidth := int32(platform.WindowWidth - platform.ClockWidth)
 	carousel := widgets.NewCarousel(platform.ClockWidth, 0,
 		widgets.NewWeatherCurrent(carouselWidth, platform.WindowHeight, haSvc),
+		widgets.NewWeatherForecast(carouselWidth, platform.WindowHeight, haSvc),
 	)
 	// ordering matches the render order from back to front
 	allWidgets := []widgets.Widget{background, grid, clock, carousel}
@@ -47,7 +48,6 @@ func RunForever(haSvc *services.HomeAssistantService) {
 	for !rl.WindowShouldClose() {
 		frame += 1
 		ctx := context.WithValue(context.Background(), widgets.KeyFrame, frame)
-		rl.BeginDrawing()
 
 		// render widgets to textures first
 		for _, w := range allWidgets {
@@ -58,9 +58,13 @@ func RunForever(haSvc *services.HomeAssistantService) {
 
 		// render all textures to a single texture that can be rotated on the actual display
 		rl.BeginTextureMode(texture)
-		for _, w := range allWidgets {
+		for idx, w := range allWidgets {
 			if w.ShouldDisplay() {
-				drawWidget(w)
+				a := uint8(255)
+				if idx == 3 {
+					a = uint8(rl.Remap(float32(frame%300), 0, 600, 0, 255))
+				}
+				drawWidget(w, a)
 			}
 		}
 		rl.EndTextureMode()
@@ -81,8 +85,9 @@ func RunForever(haSvc *services.HomeAssistantService) {
 			rotation = 90.0
 		}
 
+		rl.BeginDrawing()
+		rl.ClearBackground(rl.White) // reduces flickering
 		rl.DrawTexturePro(texture.Texture, src, dst, rl.NewVector2(0, 0), rotation, rl.White)
-
 		rl.EndDrawing()
 	}
 }
