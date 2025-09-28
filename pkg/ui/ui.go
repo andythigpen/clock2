@@ -34,7 +34,7 @@ func RunForever(haSvc *services.HomeAssistantService) {
 
 	texture := rl.LoadRenderTexture(platform.WindowWidth, platform.WindowHeight)
 
-	background := widgets.NewBackground(0, 0, platform.WindowWidth, platform.WindowHeight)
+	background := widgets.NewBackground(0, 0, platform.WindowWidth, platform.WindowHeight, haSvc)
 	grid := widgets.NewGrid(platform.WindowWidth, platform.WindowHeight)
 	clock := widgets.NewClock(0, 0, platform.ClockWidth, platform.WindowHeight)
 	carouselWidth := int32(platform.WindowWidth - platform.ClockWidth)

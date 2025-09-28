@@ -28,7 +28,7 @@ func (c *clock) RenderTexture(ctx context.Context) {
 	rl.ClearBackground(rl.Blank)
 
 	var display string
-	now := time.Now()
+	now := time.Now().Local()
 	if *uiTestClock {
 		frame := ctx.Value(KeyFrame).(uint64)
 		now = now.Add(time.Duration(frame) * time.Second)
