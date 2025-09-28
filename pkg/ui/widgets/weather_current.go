@@ -4,6 +4,8 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"image/color"
+	"unsafe"
 
 	"github.com/andythigpen/clock2/pkg/platform"
 	"github.com/andythigpen/clock2/pkg/services"
@@ -16,9 +18,12 @@ var (
 
 type weatherCurrent struct {
 	baseWidget
-	svc  *services.HomeAssistantService
-	font rl.Font
-	icon rl.Texture2D
+	svc          *services.HomeAssistantService
+	font         rl.Font
+	img          rl.Image
+	icon         rl.Texture2D
+	frameCurrent int32
+	frameTotal   int32
 }
 
 func (w *weatherCurrent) RenderTexture(ctx context.Context) {
@@ -43,6 +48,15 @@ func (w *weatherCurrent) RenderTexture(ctx context.Context) {
 		icon = w.icon
 	}
 
+	w.frameCurrent += 1
+	if w.frameCurrent >= w.frameTotal {
+		w.frameCurrent = 0
+	}
+	dataOffset := w.img.Width * w.img.Height * 4 * w.frameCurrent
+	imgSize := w.img.Width * w.img.Height
+	rl.UpdateTexture(w.icon,
+		unsafe.Slice((*color.RGBA)(unsafe.Pointer(uintptr(w.img.Data)+uintptr(dataOffset))), imgSize))
+
 	rl.DrawTexture(icon, 50, 0, rl.White)
 	rl.DrawTextEx(
 		w.font,
@@ -59,13 +73,17 @@ func (w *weatherCurrent) ShouldDisplay() bool {
 }
 
 func NewWeatherCurrent(width, height int32, svc *services.HomeAssistantService) Widget {
-	clearDay := rl.LoadImage("assets/icons/weather/static/png/480/clear-day.png")
+	frameTotal := int32(0)
+	img := rl.LoadImageAnim("assets/icons/weather/animated/gif/480/thunderstorms-day.gif", &frameTotal)
 	return &weatherCurrent{
 		baseWidget: baseWidget{
 			texture: rl.LoadRenderTexture(width, height),
 		},
-		svc:  svc,
-		font: rl.LoadFontEx("assets/fonts/Oswald-Regular.ttf", 500, nil, '°'),
-		icon: rl.LoadTextureFromImage(clearDay),
+		svc:          svc,
+		font:         rl.LoadFontEx("assets/fonts/Oswald-Regular.ttf", 500, nil, '°'),
+		img:          *img,
+		icon:         rl.LoadTextureFromImage(img),
+		frameTotal:   frameTotal,
+		frameCurrent: 0,
 	}
 }
