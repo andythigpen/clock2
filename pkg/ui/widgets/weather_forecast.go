@@ -103,7 +103,7 @@ func (w *weatherForecast) RenderTexture(ctx context.Context) {
 }
 
 func (w *weatherForecast) ShouldDisplay() bool {
-	return true
+	return false
 }
 
 func NewWeatherForecast(width, height int32, svc *services.HomeAssistantService) Widget {

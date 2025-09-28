@@ -39,11 +39,7 @@ func (r WeatherCondition) String() string {
 	}
 }
 
-func (r *WeatherCondition) UnmarshalJSON(b []byte) error {
-	var s string
-	if err := json.Unmarshal(b, &s); err != nil {
-		return err
-	}
+func (r *WeatherCondition) FromString(s string) {
 	switch s {
 	case "clear-day", "clear-night", "sunny":
 		*r = Clear
@@ -72,5 +68,13 @@ func (r *WeatherCondition) UnmarshalJSON(b []byte) error {
 	default:
 		*r = Unknown
 	}
+}
+
+func (r *WeatherCondition) UnmarshalJSON(b []byte) error {
+	var s string
+	if err := json.Unmarshal(b, &s); err != nil {
+		return err
+	}
+	r.FromString(s)
 	return nil
 }

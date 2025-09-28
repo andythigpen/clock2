@@ -43,9 +43,14 @@ func (c *carousel) RenderTexture(ctx context.Context) {
 		case carouselStateFadeOut:
 			c.state = carouselStateFadeIn
 			c.transitionEnd = frame + platform.FPS
-			c.index += 1
-			if c.index >= len(c.widgets) {
-				c.index = 0
+			for range c.widgets {
+				c.index += 1
+				if c.index >= len(c.widgets) {
+					c.index = 0
+				}
+				if c.widgets[c.index].ShouldDisplay() {
+					break
+				}
 			}
 		}
 	}
