@@ -3,7 +3,6 @@ package widgets
 import (
 	"context"
 	"flag"
-	"fmt"
 	"time"
 
 	"github.com/andythigpen/clock2/pkg/platform"
@@ -29,21 +28,20 @@ func (c *clock) RenderTexture(ctx context.Context) {
 	rl.ClearBackground(rl.Blank)
 
 	var display string
+	now := time.Now()
 	if *uiTestClock {
-		currentTime := ctx.Value(KeyFrame).(uint64) % (platform.FPS * 60 * 60 * 24)
-		hour := (currentTime / 60 % 12) + 1
-		minute := currentTime / 20 % 60
-		display = fmt.Sprintf("%02d:%02d", hour, minute)
-	} else {
-		display = time.Now().Format("03:04")
+		frame := ctx.Value(KeyFrame).(uint64)
+		now = now.Add(time.Duration(frame) * time.Second)
 	}
+	display = now.Format("03:04")
 	pos := rl.NewVector2(platform.Margin, 2*platform.Margin)
 	rl.DrawTextEx(c.fontClock, display, pos, float32(c.fontClock.BaseSize), -8.0, rl.White)
 
-	v := rl.MeasureTextEx(c.fontDate, "Mon Sep 15", float32(c.fontDate.BaseSize), 0.0)
+	display = now.Format("Mon Jan _2")
+	v := rl.MeasureTextEx(c.fontDate, display, float32(c.fontDate.BaseSize), 0.0)
 	spacing := (float32(c.texture.Texture.Width) - platform.Margin - v.X) / 2.0
 	pos = rl.NewVector2(platform.Margin+spacing, -40)
-	rl.DrawTextEx(c.fontDate, "Mon Sep 15", pos, float32(c.fontDate.BaseSize), 0.0, rl.White)
+	rl.DrawTextEx(c.fontDate, display, pos, float32(c.fontDate.BaseSize), 0.0, rl.White)
 }
 
 func NewClock(x, y float32, width, height int32) Widget {
