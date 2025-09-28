@@ -22,7 +22,8 @@ func (g *grid) RenderTexture(ctx context.Context) {
 	defer rl.EndTextureMode()
 
 	color := rl.Red
-	colorAlternate := rl.Green
+	colorThirds := rl.Green
+	colorQuarters := rl.Purple
 	width := g.texture.Texture.Width
 	height := g.texture.Texture.Height
 
@@ -49,10 +50,10 @@ func (g *grid) RenderTexture(ctx context.Context) {
 	// right carousel
 	carouselWidth := width - clockWidth - (2 * margin)
 	rl.DrawLine(clockWidth+margin+(carouselWidth/2), 0, clockWidth+margin+(carouselWidth/2), height, color)
-	rl.DrawLine(clockWidth+margin+(carouselWidth/4), 0, clockWidth+margin+(carouselWidth/4), height, color)
-	rl.DrawLine(clockWidth+margin+(carouselWidth*3/4), 0, clockWidth+margin+(carouselWidth*3/4), height, color)
-	rl.DrawLine(clockWidth+margin+(carouselWidth/3), 0, clockWidth+margin+(carouselWidth/3), height, colorAlternate)
-	rl.DrawLine(clockWidth+margin+(carouselWidth*2/3), 0, clockWidth+margin+(carouselWidth*2/3), height, colorAlternate)
+	rl.DrawLine(clockWidth+margin+(carouselWidth/4), 0, clockWidth+margin+(carouselWidth/4), height, colorQuarters)
+	rl.DrawLine(clockWidth+margin+(carouselWidth*3/4), 0, clockWidth+margin+(carouselWidth*3/4), height, colorQuarters)
+	rl.DrawLine(clockWidth+margin+(carouselWidth/3), 0, clockWidth+margin+(carouselWidth/3), height, colorThirds)
+	rl.DrawLine(clockWidth+margin+(carouselWidth*2/3), 0, clockWidth+margin+(carouselWidth*2/3), height, colorThirds)
 }
 
 func (g *grid) ShouldDisplay() bool {

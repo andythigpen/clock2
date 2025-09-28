@@ -41,8 +41,9 @@ func RunForever(haSvc *services.HomeAssistantService) {
 	carouselHeight := int32(platform.WindowHeight)
 	carousel := widgets.NewCarousel(
 		platform.ClockWidth, 0, carouselWidth, platform.WindowHeight,
-		widgets.NewWeatherCurrent(carouselWidth, carouselHeight, haSvc),
-		widgets.NewWeatherForecast(carouselWidth, carouselHeight, haSvc),
+		// widgets.NewWeatherCurrent(carouselWidth, carouselHeight, haSvc),
+		// widgets.NewWeatherForecast(carouselWidth, carouselHeight, haSvc),
+		widgets.NewWeatherTomorrow(carouselWidth, carouselHeight, haSvc),
 	)
 	// ordering matches the render order from back to front
 	allWidgets := []widgets.Widget{background, grid, clock, carousel}

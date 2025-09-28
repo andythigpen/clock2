@@ -4,8 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"image/color"
-	"unsafe"
 
 	"github.com/andythigpen/clock2/pkg/models/weather"
 	"github.com/andythigpen/clock2/pkg/platform"
@@ -21,10 +19,7 @@ type weatherCurrent struct {
 	baseWidget
 	svc          *services.HomeAssistantService
 	font         rl.Font
-	img          rl.Image
-	icon         rl.Texture2D
-	frameCurrent int32
-	frameTotal   int32
+	icon         animatedIcon
 	prevState    weather.WeatherCondition
 	currentState weather.WeatherCondition
 	temperature  string
@@ -55,17 +50,13 @@ func (w *weatherCurrent) FetchData(ctx context.Context) {
 
 	// load new icon on state change
 	if w.prevState != w.currentState {
-		rl.UnloadImage(&w.img)
-		w.frameTotal = int32(0)
-		w.frameCurrent = 0
 		iconName := getWeatherConditionIconName(w.currentState)
 		opts := []iconOption{}
 		if w.currentState != weather.Exceptional && w.currentState != weather.Unknown {
 			opts = append(opts, Animated())
 		}
 		filename := getAssetIconPath(iconName, opts...)
-		w.img = *rl.LoadImageAnim(filename, &w.frameTotal)
-		w.icon = rl.LoadTextureFromImage(&w.img)
+		w.icon.LoadImage(filename)
 		w.prevState = w.currentState
 	}
 }
@@ -76,18 +67,9 @@ func (w *weatherCurrent) RenderTexture(ctx context.Context) {
 	rl.ClearBackground(rl.Blank)
 
 	// animate the current icon
-	if w.frameTotal > 1 {
-		w.frameCurrent += 1
-		if w.frameCurrent >= w.frameTotal {
-			w.frameCurrent = 0
-		}
-		dataOffset := w.img.Width * w.img.Height * 4 * w.frameCurrent
-		imgSize := w.img.Width * w.img.Height
-		rl.UpdateTexture(w.icon,
-			unsafe.Slice((*color.RGBA)(unsafe.Pointer(uintptr(w.img.Data)+uintptr(dataOffset))), imgSize))
-	}
+	w.icon.RenderFrame()
 
-	rl.DrawTexture(w.icon, 50, 0, rl.White)
+	rl.DrawTexture(w.icon.Texture(), 50, 0, rl.White)
 	rl.DrawTextEx(
 		w.font,
 		w.temperature,
@@ -103,19 +85,14 @@ func (w *weatherCurrent) ShouldDisplay() bool {
 }
 
 func NewWeatherCurrent(width, height int32, svc *services.HomeAssistantService) Widget {
-	frameTotal := int32(0)
 	iconName := getWeatherConditionIconName(weather.Unknown)
 	iconPath := getAssetIconPath(iconName)
-	img := rl.LoadImageAnim(iconPath, &frameTotal)
 	return &weatherCurrent{
 		baseWidget: baseWidget{
 			texture: rl.LoadRenderTexture(width, height),
 		},
-		svc:          svc,
-		font:         rl.LoadFontEx("assets/fonts/Oswald-Regular.ttf", 500, nil, '°'),
-		img:          *img,
-		icon:         rl.LoadTextureFromImage(img),
-		frameTotal:   0,
-		frameCurrent: 0,
+		svc:  svc,
+		font: rl.LoadFontEx("assets/fonts/Oswald-Regular.ttf", 500, nil, '°'),
+		icon: NewAnimatedIcon(iconPath),
 	}
 }
