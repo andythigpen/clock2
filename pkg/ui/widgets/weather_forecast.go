@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/andythigpen/clock2/pkg/models/weather"
 	"github.com/andythigpen/clock2/pkg/platform"
 	"github.com/andythigpen/clock2/pkg/services"
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -15,7 +16,8 @@ type weatherForecast struct {
 	svc      *services.HomeAssistantService
 	font     rl.Font
 	fontHour rl.Font
-	icon     rl.Texture2D
+	icons    map[weather.WeatherCondition]rl.Texture2D
+	hours    []forecastHour
 }
 
 type forecastHour struct {
@@ -24,18 +26,15 @@ type forecastHour struct {
 	temperature string
 }
 
-func (w *weatherForecast) RenderTexture(ctx context.Context) {
-	rl.BeginTextureMode(w.texture)
-	defer rl.EndTextureMode()
-
-	now := time.Now()
+func (w *weatherForecast) FetchData(ctx context.Context) {
+	now := time.Now().Local()
 	hours := []forecastHour{}
 	forecast := w.svc.GetForecast()
 	for _, hour := range forecast.Attributes.Forecast {
 		if hour.DateTime.After(now) {
 			hours = append(hours, forecastHour{
 				hour:        hour.DateTime.Format("03"),
-				icon:        w.icon, // TODO
+				icon:        w.icons[hour.Condition],
 				temperature: strconv.Itoa(int(hour.Temperature)),
 			})
 			if len(hours) >= 3 {
@@ -43,14 +42,20 @@ func (w *weatherForecast) RenderTexture(ctx context.Context) {
 			}
 		}
 	}
-	if len(hours) < 3 {
-		// TODO
-		return
+	w.hours = hours
+}
+
+func (w *weatherForecast) RenderTexture(ctx context.Context) {
+	if len(w.hours) < 3 {
+		panic("expected at least 3 hours of data")
 	}
 
+	rl.BeginTextureMode(w.texture)
+	defer rl.EndTextureMode()
+
 	width := w.texture.Texture.Width
-	iconWidth := hours[0].icon.Width
-	iconHeight := hours[0].icon.Height
+	iconWidth := w.hours[0].icon.Width
+	iconHeight := w.hours[0].icon.Height
 	margin := int32(platform.Margin)
 	marginTop := int32(35)
 	marginTopText := int32(-45)
@@ -62,10 +67,10 @@ func (w *weatherForecast) RenderTexture(ctx context.Context) {
 	}
 
 	for i, c := range centers {
-		textSize := rl.MeasureTextEx(w.font, hours[i].temperature, float32(w.font.BaseSize), 0)
+		textSize := rl.MeasureTextEx(w.font, w.hours[i].temperature, float32(w.font.BaseSize), 0)
 		rl.DrawTextPro(
 			w.fontHour,
-			hours[i].hour,
+			w.hours[i].hour,
 			rl.NewVector2(float32(c), 0),
 			rl.NewVector2(0, 0),          // origin
 			0,                            // rotation
@@ -75,7 +80,7 @@ func (w *weatherForecast) RenderTexture(ctx context.Context) {
 		)
 		rl.DrawTextPro(
 			w.font,
-			hours[i].temperature,
+			w.hours[i].temperature,
 			rl.NewVector2(float32(c)-(textSize.X/2), float32(marginTopText+iconHeight)),
 			rl.NewVector2(0, 0),      // origin
 			0,                        // rotation
@@ -83,31 +88,23 @@ func (w *weatherForecast) RenderTexture(ctx context.Context) {
 			0,                        // spacing
 			rl.White,
 		)
-		rl.DrawTexture(hours[i].icon, c-iconWidth/2, marginTop, rl.White)
+		rl.DrawTexture(w.hours[i].icon, c-iconWidth/2, marginTop, rl.White)
 	}
-
-	// rl.DrawTexture(hours[0].icon, (width/6)-iconWidth/2+margin/2, marginTop, rl.White)
-	// rl.DrawTexture(hours[1].icon, (width/2)-iconWidth/2, marginTop, rl.White)
-	// rl.DrawTexture(hours[2].icon, (width*5/6)-iconWidth/2-margin/2, marginTop, rl.White)
-
-	// rl.MeasureTextEx(w.font)
-	// rl.DrawText()
-	// rl.DrawTextEx(
-	// 	w.font,
-	// 	"TODO",
-	// 	rl.NewVector2(0, 0),
-	// 	float32(w.font.BaseSize),
-	// 	-16.0,
-	// 	rl.White,
-	// )
 }
 
 func (w *weatherForecast) ShouldDisplay() bool {
-	return false
+	return len(w.hours) >= 3
 }
 
 func NewWeatherForecast(width, height int32, svc *services.HomeAssistantService) Widget {
-	clearDay := rl.LoadImage("assets/icons/weather/static/png/256/clear-day.png")
+	icons := make(map[weather.WeatherCondition]rl.Texture2D)
+	for _, condition := range weather.AllConditions {
+		iconName := getWeatherConditionIconName(condition)
+		iconPath := getAssetIconPath(iconName, WithSize(256))
+		img := rl.LoadImage(iconPath)
+		icons[condition] = rl.LoadTextureFromImage(img)
+		rl.UnloadImage(img)
+	}
 	return &weatherForecast{
 		baseWidget: baseWidget{
 			texture: rl.LoadRenderTexture(width, height),
@@ -115,6 +112,6 @@ func NewWeatherForecast(width, height int32, svc *services.HomeAssistantService)
 		svc:      svc,
 		font:     rl.LoadFontEx("assets/fonts/Oswald-Regular.ttf", 240, nil),
 		fontHour: rl.LoadFontEx("assets/fonts/Oswald-Bold.ttf", 192, nil),
-		icon:     rl.LoadTextureFromImage(clearDay),
+		icons:    icons,
 	}
 }

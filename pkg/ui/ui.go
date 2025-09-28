@@ -53,6 +53,9 @@ func RunForever(haSvc *services.HomeAssistantService) {
 
 		// render widgets to textures first
 		for _, w := range allWidgets {
+			if f, ok := w.(widgets.Fetcher); ok {
+				f.FetchData(ctx)
+			}
 			if w.ShouldDisplay() {
 				w.RenderTexture(ctx)
 			}

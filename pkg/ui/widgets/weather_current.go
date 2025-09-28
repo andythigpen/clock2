@@ -26,77 +26,54 @@ type weatherCurrent struct {
 	frameCurrent int32
 	frameTotal   int32
 	prevState    weather.WeatherCondition
+	currentState weather.WeatherCondition
+	temperature  string
+	stateIdx     int
+}
+
+var _ Fetcher = (*weatherCurrent)(nil)
+
+func (w *weatherCurrent) FetchData(ctx context.Context) {
+	if *uiTestCurrentWeather {
+		frame := ctx.Value(KeyFrame).(uint64)
+		t := int32(rl.Remap(float32(frame%(30*platform.FPS)), 0, (30*platform.FPS)-1, -20, 110))
+		w.temperature = fmt.Sprintf("%d°", t)
+		w.currentState = w.prevState
+		if frame%360 == 0 { // there are currently 360 frames per animation
+			// cycle through icons
+			w.stateIdx += 1
+			if w.stateIdx > len(weather.AllConditions) {
+				w.stateIdx = 0
+			}
+			w.currentState = weather.AllConditions[w.stateIdx]
+		}
+	} else {
+		currentWeather := w.svc.GetWeather()
+		w.currentState = currentWeather.State
+		w.temperature = fmt.Sprintf("%d°", currentWeather.Attributes.Temperature)
+	}
+
+	// load new icon on state change
+	if w.prevState != w.currentState {
+		rl.UnloadImage(&w.img)
+		w.frameTotal = int32(0)
+		w.frameCurrent = 0
+		iconName := getWeatherConditionIconName(w.currentState)
+		opts := []iconOption{}
+		if w.currentState != weather.Exceptional && w.currentState != weather.Unknown {
+			opts = append(opts, Animated())
+		}
+		filename := getAssetIconPath(iconName, opts...)
+		w.img = *rl.LoadImageAnim(filename, &w.frameTotal)
+		w.icon = rl.LoadTextureFromImage(&w.img)
+		w.prevState = w.currentState
+	}
 }
 
 func (w *weatherCurrent) RenderTexture(ctx context.Context) {
 	rl.BeginTextureMode(w.texture)
 	defer rl.EndTextureMode()
 	rl.ClearBackground(rl.Blank)
-
-	var (
-		temperature  string
-		currentState weather.WeatherCondition
-	)
-
-	if *uiTestCurrentWeather {
-		frame := ctx.Value(KeyFrame).(uint64)
-		t := int32(rl.Remap(float32(frame%(30*platform.FPS)), 0, (30*platform.FPS)-1, -20, 110))
-		temperature = fmt.Sprintf("%d°", t)
-		currentState = w.prevState
-		if frame%360 == 0 { // there are currently 360 frames per animation
-			// cycle through icons
-			switch w.prevState {
-			case weather.Clear:
-				currentState = weather.Cloudy
-			case weather.Cloudy:
-				currentState = weather.Exceptional
-			case weather.Exceptional:
-				currentState = weather.Fog
-			case weather.Fog:
-				currentState = weather.Hail
-			case weather.Hail:
-				currentState = weather.PartlyCloudy
-			case weather.PartlyCloudy:
-				currentState = weather.Rain
-			case weather.Rain:
-				currentState = weather.Sleet
-			case weather.Sleet:
-				currentState = weather.Snow
-			case weather.Snow:
-				currentState = weather.Thunderstorms
-			case weather.Thunderstorms:
-				currentState = weather.ThunderstormsRain
-			case weather.ThunderstormsRain:
-				currentState = weather.Unknown
-			case weather.Unknown:
-				currentState = weather.Windy
-			case weather.Windy:
-				currentState = weather.Clear
-			default:
-				currentState = weather.Rain
-			}
-		}
-	} else {
-		currentWeather := w.svc.GetWeather()
-		currentState = currentWeather.State
-		temperature = fmt.Sprintf("%d°", currentWeather.Attributes.Temperature)
-	}
-
-	// load new icon on state change
-	if w.prevState != currentState {
-		rl.UnloadImage(&w.img)
-		w.frameTotal = int32(0)
-		w.frameCurrent = 0
-		iconName := getWeatherConditionIconName(currentState)
-		opts := []iconOption{}
-		if currentState != weather.Exceptional && currentState != weather.Unknown {
-			opts = append(opts, Animated())
-		}
-		filename := getAssetIconPath(iconName, opts...)
-		w.img = *rl.LoadImageAnim(filename, &w.frameTotal)
-		w.icon = rl.LoadTextureFromImage(&w.img)
-		w.prevState = currentState
-	}
 
 	// animate the current icon
 	if w.frameTotal > 1 {
@@ -113,7 +90,7 @@ func (w *weatherCurrent) RenderTexture(ctx context.Context) {
 	rl.DrawTexture(w.icon, 50, 0, rl.White)
 	rl.DrawTextEx(
 		w.font,
-		temperature,
+		w.temperature,
 		rl.NewVector2(540, -26),
 		float32(w.font.BaseSize),
 		-16.0,

@@ -17,6 +17,11 @@ type Widget interface {
 	GetY() float32
 }
 
+type Fetcher interface {
+	// Called prior to the rendering loop so that widgets can fetch information for display
+	FetchData(ctx context.Context)
+}
+
 type baseWidget struct {
 	texture rl.RenderTexture2D
 	x       float32

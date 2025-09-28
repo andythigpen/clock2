@@ -25,6 +25,22 @@ const (
 	Windy             WeatherCondition = "windy"
 )
 
+var AllConditions = []WeatherCondition{
+	Clear,
+	Cloudy,
+	Exceptional,
+	Fog,
+	Hail,
+	PartlyCloudy,
+	Rain,
+	Sleet,
+	Snow,
+	Thunderstorms,
+	ThunderstormsRain,
+	Unknown,
+	Windy,
+}
+
 func (r WeatherCondition) String() string {
 	switch r {
 	case Exceptional:

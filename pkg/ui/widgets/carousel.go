@@ -24,8 +24,17 @@ type carousel struct {
 	transitionEnd   uint64
 }
 
+var _ Fetcher = (*carousel)(nil)
+
 func (c *carousel) currentWidget() Widget {
 	return c.widgets[c.index]
+}
+
+func (c *carousel) FetchData(ctx context.Context) {
+	widget := c.currentWidget()
+	if f, ok := widget.(Fetcher); ok {
+		f.FetchData(ctx)
+	}
 }
 
 func (c *carousel) RenderTexture(ctx context.Context) {
