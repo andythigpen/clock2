@@ -2,9 +2,14 @@ package widgets
 
 import (
 	"context"
+	"flag"
 
 	"github.com/andythigpen/clock2/pkg/platform"
 	rl "github.com/gen2brain/raylib-go/raylib"
+)
+
+var (
+	uiTestCarouselWidget = flag.Int("ui-test-carousel-widget", -1, "index of a carousel widget to test")
 )
 
 type carouselState int
@@ -22,6 +27,7 @@ type carousel struct {
 	state           carouselState
 	transitionStart uint64
 	transitionEnd   uint64
+	shouldAdvance   bool
 }
 
 var _ Fetcher = (*carousel)(nil)
@@ -30,32 +36,26 @@ func (c *carousel) currentWidget() Widget {
 	return c.widgets[c.index]
 }
 
-func (c *carousel) FetchData(ctx context.Context) {
-	widget := c.currentWidget()
-	if f, ok := widget.(Fetcher); ok {
-		f.FetchData(ctx)
-	}
-}
-
-func (c *carousel) RenderTexture(ctx context.Context) {
-	frame := ctx.Value(KeyFrame).(uint64)
-
-	if frame >= c.transitionEnd {
-		c.transitionStart = frame
-		switch c.state {
-		case carouselStateFadeIn:
-			c.state = carouselStateNormal
-			c.transitionEnd = frame + (15 * platform.FPS)
-		case carouselStateNormal:
-			c.state = carouselStateFadeOut
-			c.transitionEnd = frame + platform.FPS
-		case carouselStateFadeOut:
-			c.state = carouselStateFadeIn
-			c.transitionEnd = frame + platform.FPS
+func (c *carousel) advanceTransition(ctx context.Context, frame uint64) {
+	c.transitionStart = frame
+	switch c.state {
+	case carouselStateFadeIn:
+		c.state = carouselStateNormal
+		c.transitionEnd = frame + (15 * platform.FPS)
+	case carouselStateNormal:
+		c.state = carouselStateFadeOut
+		c.transitionEnd = frame + platform.FPS
+	case carouselStateFadeOut:
+		c.state = carouselStateFadeIn
+		c.transitionEnd = frame + platform.FPS
+		if c.shouldAdvance {
 			for range c.widgets {
 				c.index += 1
 				if c.index >= len(c.widgets) {
 					c.index = 0
+				}
+				if f, ok := (c.widgets[c.index]).(Fetcher); ok {
+					f.FetchData(ctx)
 				}
 				if c.widgets[c.index].ShouldDisplay() {
 					break
@@ -63,6 +63,22 @@ func (c *carousel) RenderTexture(ctx context.Context) {
 			}
 		}
 	}
+}
+
+func (c *carousel) FetchData(ctx context.Context) {
+	widget := c.currentWidget()
+	if f, ok := widget.(Fetcher); ok {
+		f.FetchData(ctx)
+	}
+
+	frame := ctx.Value(KeyFrame).(uint64)
+	if frame >= c.transitionEnd {
+		c.advanceTransition(ctx, frame)
+	}
+}
+
+func (c *carousel) RenderTexture(ctx context.Context) {
+	frame := ctx.Value(KeyFrame).(uint64)
 
 	widget := c.currentWidget()
 	widget.RenderTexture(ctx)
@@ -97,7 +113,7 @@ func NewCarousel(x, y float32, width, height int32, widgets ...Widget) Widget {
 	if len(widgets) == 0 {
 		panic("at least one widget is required")
 	}
-	return &carousel{
+	c := &carousel{
 		baseWidget: baseWidget{
 			texture: rl.LoadRenderTexture(width, height),
 			x:       x,
@@ -106,4 +122,11 @@ func NewCarousel(x, y float32, width, height int32, widgets ...Widget) Widget {
 		widgets: widgets,
 		index:   0,
 	}
+	if *uiTestCarouselWidget >= 0 && *uiTestCarouselWidget < len(c.widgets) {
+		c.index = *uiTestCarouselWidget
+		c.shouldAdvance = false
+	} else {
+		c.shouldAdvance = true
+	}
+	return c
 }
