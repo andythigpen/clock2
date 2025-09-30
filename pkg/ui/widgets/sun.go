@@ -73,8 +73,8 @@ func NewSun(width, height int32, svc *services.HomeAssistantService) Widget {
 			texture: rl.LoadRenderTexture(width, height),
 		},
 		svc:         svc,
-		iconRising:  NewAnimatedIcon(getAssetIconPath("sunrise")),
-		iconSetting: NewAnimatedIcon(getAssetIconPath("sunset")),
+		iconRising:  NewAnimatedIcon(getAssetIconPath("sunrise", WithSize(480), Animated())),
+		iconSetting: NewAnimatedIcon(getAssetIconPath("sunset", WithSize(480), Animated())),
 		fontClock:   rl.LoadFontEx("assets/fonts/BebasNeue-Regular.ttf", 340, nil),
 	}
 }

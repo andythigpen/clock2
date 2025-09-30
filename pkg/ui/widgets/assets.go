@@ -1,6 +1,7 @@
 package widgets
 
 import (
+	"flag"
 	"fmt"
 	"path"
 	"strconv"
@@ -9,7 +10,14 @@ import (
 	"github.com/andythigpen/clock2/pkg/models/weather"
 )
 
+var (
+	uiTestDayNight = flag.String("ui-test-day-night", "", "set to day or night to change asset icons")
+)
+
 func isDay() bool {
+	if len(*uiTestDayNight) > 0 {
+		return *uiTestDayNight == "day"
+	}
 	now := time.Now()
 	hour := now.Hour()
 	return hour >= 6 && hour <= 19
