@@ -15,6 +15,9 @@ for img in "$input_dir"/*.png; do
     width=${dimensions%x*}
     height=${dimensions#*x}
     offset=$(convert "$img" -trim -format "%[fx:page.x],%[fx:page.y]" info:)
+    if [[ "$offset" == "-1,-1" ]]; then
+        continue
+    fi
     x_offset=${offset%,*}
     y_offset=${offset#*,}
 
@@ -27,6 +30,8 @@ done
 
 final_width=$(($max_x - $min_x))
 final_height=$(($max_y - $min_y))
+
+echo "${final_width}x${final_height}"
 
 for img in "$input_dir"/*.png; do
     filename=$(basename "$img")
