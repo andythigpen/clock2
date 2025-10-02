@@ -84,12 +84,8 @@ func (w *weatherTomorrow) FetchData(ctx context.Context) {
 	}
 	if w.prevState != w.currentState {
 		iconName := getWeatherConditionIconName(w.currentState)
-		opts := []iconOption{}
-		if w.currentState != weather.Exceptional && w.currentState != weather.Unknown {
-			opts = append(opts, Animated())
-		}
-		filename := getAssetIconPath(iconName, opts...)
-		w.icon.LoadImage(filename)
+		filename := getAssetIconPath(iconName, Animated())
+		w.icon.SetFilename(filename)
 		w.prevState = w.currentState
 	}
 }
@@ -100,9 +96,9 @@ func (w *weatherTomorrow) RenderTexture(ctx context.Context) {
 	rl.ClearBackground(rl.Blank)
 
 	// animate the current icon
-	w.icon.RenderFrame()
-
-	rl.DrawTexture(w.icon.Texture(), 50, 0, rl.White)
+	x := w.texture.Texture.Width/4 - (w.icon.Width() / 2)
+	y := w.texture.Texture.Height/2 - (w.icon.Height() / 2)
+	w.icon.RenderFrame(float32(x), float32(y))
 
 	spacing := float32(-6.0)
 	title := "Tomorrow"
@@ -158,12 +154,23 @@ func (w *weatherTomorrow) ShouldDisplay() bool {
 	return time.Now().Hour() >= 17 && w.currentState != weather.Unknown
 }
 
+func (w *weatherTomorrow) LoadAssets() {
+	w.icon.LoadAssets()
+}
+
+func (w *weatherTomorrow) UnloadAssets() {
+	w.icon.UnloadAssets()
+}
+
 func NewWeatherTomorrow(width, height int32, svc *services.HomeAssistantService) Widget {
+	iconName := getWeatherConditionIconName(weather.Unknown)
+	iconPath := getAssetIconPath(iconName, Animated())
 	return &weatherTomorrow{
 		baseWidget: baseWidget{
 			texture: rl.LoadRenderTexture(width, height),
 		},
 		svc:       svc,
 		fontTitle: rl.LoadFontEx("assets/fonts/Oswald-Regular.ttf", 200, nil),
+		icon:      NewAnimatedIcon(iconPath),
 	}
 }

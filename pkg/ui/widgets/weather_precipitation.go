@@ -74,12 +74,8 @@ func (w *weatherPrecipitation) FetchData(ctx context.Context) {
 
 	if w.prevState != w.precipitation.Condition {
 		iconName := getWeatherConditionIconName(w.precipitation.Condition)
-		opts := []iconOption{WithSize(480)}
-		if w.precipitation.Condition != weather.Unknown && w.precipitation.Condition != weather.Exceptional {
-			opts = append(opts, Animated())
-		}
-		iconPath := getAssetIconPath(iconName, opts...)
-		w.icon.LoadImage(iconPath)
+		iconPath := getAssetIconPath(iconName, Animated())
+		w.icon.SetFilename(iconPath)
 		w.prevState = w.precipitation.Condition
 	}
 }
@@ -107,8 +103,9 @@ func (w *weatherPrecipitation) RenderTexture(ctx context.Context) {
 	)
 
 	// animate the current icon
-	w.icon.RenderFrame()
-	rl.DrawTexture(w.icon.Texture(), 50, 0, rl.White)
+	x := w.texture.Texture.Width/4 - (w.icon.Width() / 2)
+	y := w.texture.Texture.Height/2 - (w.icon.Height() / 2)
+	w.icon.RenderFrame(float32(x), float32(y))
 
 	// probability text
 	spacing = float32(-16.0)
@@ -131,7 +128,17 @@ func (w *weatherPrecipitation) ShouldDisplay() bool {
 	return w.precipitation != nil
 }
 
+func (w *weatherPrecipitation) LoadAssets() {
+	w.icon.LoadAssets()
+}
+
+func (w *weatherPrecipitation) UnloadAssets() {
+	w.icon.UnloadAssets()
+}
+
 func NewWeatherPrecipitation(width, height int32, svc *services.HomeAssistantService) Widget {
+	iconName := getWeatherConditionIconName(weather.Unknown)
+	iconPath := getAssetIconPath(iconName, Animated())
 	return &weatherPrecipitation{
 		baseWidget: baseWidget{
 			texture: rl.LoadRenderTexture(width, height),
@@ -139,5 +146,6 @@ func NewWeatherPrecipitation(width, height int32, svc *services.HomeAssistantSer
 		svc:      svc,
 		font:     rl.LoadFontEx("assets/fonts/Oswald-Regular.ttf", 500, nil),
 		fontHour: rl.LoadFontEx("assets/fonts/Oswald-Bold.ttf", 192, nil),
+		icon:     NewAnimatedIcon(iconPath),
 	}
 }

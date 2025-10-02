@@ -9,7 +9,8 @@ import (
 )
 
 var (
-	uiTestCarouselWidget = flag.Int("ui-test-carousel-widget", -1, "index of a carousel widget to test")
+	uiTestCarouselWidget  = flag.Int("ui-test-carousel-widget", -1, "index of a carousel widget to test")
+	uiTestCarouselSeconds = flag.Int("ui-test-carousel-secs", 15, "number of seconds to display a widget before advancing")
 )
 
 type carouselState int
@@ -36,49 +37,62 @@ func (c *carousel) currentWidget() Widget {
 	return c.widgets[c.index]
 }
 
-func (c *carousel) advanceTransition(ctx context.Context, frame uint64) {
+func (c *carousel) nextIndex() int {
+	if !c.shouldAdvance {
+		return c.index
+	}
+
+	idx := c.index
+	for range c.widgets {
+		idx += 1
+		if idx >= len(c.widgets) {
+			idx = 0
+		}
+		if c.widgets[idx].ShouldDisplay() {
+			break
+		}
+	}
+	return idx
+}
+
+func (c *carousel) advanceTransition(frame uint64) {
 	c.transitionStart = frame
 	switch c.state {
 	case carouselStateFadeIn:
 		c.state = carouselStateNormal
-		c.transitionEnd = frame + (15 * platform.FPS)
+		c.transitionEnd = frame + (uint64(*uiTestCarouselSeconds) * platform.FPS)
 	case carouselStateNormal:
 		c.state = carouselStateFadeOut
 		c.transitionEnd = frame + platform.FPS
 	case carouselStateFadeOut:
 		c.state = carouselStateFadeIn
 		c.transitionEnd = frame + platform.FPS
-		if c.shouldAdvance {
-			for range c.widgets {
-				c.index += 1
-				if c.index >= len(c.widgets) {
-					c.index = 0
-				}
-				if f, ok := (c.widgets[c.index]).(Fetcher); ok {
-					f.FetchData(ctx)
-				}
-				if c.widgets[c.index].ShouldDisplay() {
-					break
-				}
-			}
+		idx := c.nextIndex()
+		widget := c.currentWidget()
+		if widget, ok := widget.(Loader); ok {
+			widget.UnloadAssets()
 		}
+		widget = c.widgets[idx]
+		if widget, ok := widget.(Loader); ok {
+			widget.LoadAssets()
+		}
+		c.index = idx
 	}
 }
 
 func (c *carousel) FetchData(ctx context.Context) {
-	widget := c.currentWidget()
-	if f, ok := widget.(Fetcher); ok {
-		f.FetchData(ctx)
-	}
-
-	frame := ctx.Value(KeyFrame).(uint64)
-	if frame >= c.transitionEnd {
-		c.advanceTransition(ctx, frame)
+	for _, widget := range c.widgets {
+		if widget, ok := widget.(Fetcher); ok {
+			widget.FetchData(ctx)
+		}
 	}
 }
 
 func (c *carousel) RenderTexture(ctx context.Context) {
 	frame := ctx.Value(KeyFrame).(uint64)
+	if frame >= c.transitionEnd {
+		c.advanceTransition(frame)
+	}
 
 	widget := c.currentWidget()
 	widget.RenderTexture(ctx)
@@ -107,6 +121,27 @@ func (c *carousel) RenderTexture(ctx context.Context) {
 
 func (c *carousel) ShouldDisplay() bool {
 	return true
+}
+
+func (c *carousel) LoadAssets() {
+	widget := c.currentWidget()
+	if widget, ok := widget.(Loader); ok {
+		widget.LoadAssets()
+	}
+}
+
+func (c *carousel) UnloadAssets() {
+	widget := c.currentWidget()
+	if widget, ok := widget.(Loader); ok {
+		widget.UnloadAssets()
+	}
+}
+
+func (c *carousel) Unload() {
+	c.baseWidget.Unload()
+	for _, widget := range c.widgets {
+		widget.Unload()
+	}
 }
 
 func NewCarousel(x, y float32, width, height int32, widgets ...Widget) Widget {

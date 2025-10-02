@@ -53,7 +53,7 @@ func getAssetIconPath(name string, options ...iconOption) string {
 		opt(o)
 	}
 	if o.isAnimated {
-		return path.Join("assets/icons", o.iconType, "animated", strconv.Itoa(o.size), fmt.Sprintf("%s.gif", name))
+		return path.Join("assets/icons", o.iconType, "sprites", fmt.Sprintf("%s.png", name))
 	}
 	return path.Join("assets/icons", o.iconType, "static", strconv.Itoa(o.size), fmt.Sprintf("%s.png", name))
 }

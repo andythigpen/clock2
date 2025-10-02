@@ -51,12 +51,8 @@ func (w *weatherCurrent) FetchData(ctx context.Context) {
 	// load new icon on state change
 	if w.prevState != w.currentState {
 		iconName := getWeatherConditionIconName(w.currentState)
-		opts := []iconOption{}
-		if w.currentState != weather.Exceptional && w.currentState != weather.Unknown {
-			opts = append(opts, Animated())
-		}
-		filename := getAssetIconPath(iconName, opts...)
-		w.icon.LoadImage(filename)
+		filename := getAssetIconPath(iconName, Animated())
+		w.icon.SetFilename(filename)
 		w.prevState = w.currentState
 	}
 }
@@ -67,9 +63,10 @@ func (w *weatherCurrent) RenderTexture(ctx context.Context) {
 	rl.ClearBackground(rl.Blank)
 
 	// animate the current icon
-	w.icon.RenderFrame()
+	x := w.texture.Texture.Width/4 - (w.icon.Width() / 2)
+	y := w.texture.Texture.Height/2 - (w.icon.Height() / 2)
+	w.icon.RenderFrame(float32(x), float32(y))
 
-	rl.DrawTexture(w.icon.Texture(), 50, 0, rl.White)
 	rl.DrawTextEx(
 		w.font,
 		w.temperature,
@@ -84,9 +81,22 @@ func (w *weatherCurrent) ShouldDisplay() bool {
 	return true
 }
 
+func (w *weatherCurrent) LoadAssets() {
+	w.icon.LoadAssets()
+}
+
+func (w *weatherCurrent) UnloadAssets() {
+	w.icon.UnloadAssets()
+}
+
+func (w *weatherCurrent) Unload() {
+	w.baseWidget.Unload()
+	rl.UnloadFont(w.font)
+}
+
 func NewWeatherCurrent(width, height int32, svc *services.HomeAssistantService) Widget {
-	iconName := getWeatherConditionIconName(weather.Unknown)
-	iconPath := getAssetIconPath(iconName)
+	iconName := getWeatherConditionIconName(weather.Cloudy)
+	iconPath := getAssetIconPath(iconName, Animated())
 	return &weatherCurrent{
 		baseWidget: baseWidget{
 			texture: rl.LoadRenderTexture(width, height),

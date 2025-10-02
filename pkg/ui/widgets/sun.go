@@ -33,20 +33,18 @@ func (s *sun) RenderTexture(ctx context.Context) {
 	defer rl.EndTextureMode()
 	rl.ClearBackground(rl.Blank)
 
-	var (
-		texture  rl.Texture2D
-		textTime string
-	)
+	var textTime string
 	if s.rising {
-		s.iconRising.RenderFrame()
-		texture = s.iconRising.Texture()
+		x := s.texture.Texture.Width/4 - (s.iconRising.Width() / 2)
+		y := s.texture.Texture.Height/2 - (s.iconRising.Height() / 2)
+		s.iconRising.RenderFrame(float32(x), float32(y))
 		textTime = s.nextRising.Format("03:04")
 	} else {
-		s.iconSetting.RenderFrame()
-		texture = s.iconSetting.Texture()
+		x := s.texture.Texture.Width/4 - (s.iconSetting.Width() / 2)
+		y := s.texture.Texture.Height/2 - (s.iconSetting.Height() / 2)
+		s.iconSetting.RenderFrame(float32(x), float32(y))
 		textTime = s.nextSetting.Format("03:04")
 	}
-	rl.DrawTexture(texture, 50, 0, rl.White)
 
 	spacing := float32(-8.0)
 	textSize := rl.MeasureTextEx(s.fontClock, textTime, float32(s.fontClock.BaseSize), spacing)
@@ -65,6 +63,22 @@ func (s *sun) RenderTexture(ctx context.Context) {
 func (s *sun) ShouldDisplay() bool {
 	twoHoursFromNow := time.Now().Add(2 * time.Hour)
 	return s.nextRising.Before(twoHoursFromNow) || s.nextSetting.Before(twoHoursFromNow)
+}
+
+func (s *sun) LoadAssets() {
+	if s.rising {
+		s.iconRising.LoadAssets()
+	} else {
+		s.iconSetting.LoadAssets()
+	}
+}
+
+func (s *sun) UnloadAssets() {
+	if s.rising {
+		s.iconRising.UnloadAssets()
+	} else {
+		s.iconSetting.UnloadAssets()
+	}
 }
 
 func NewSun(width, height int32, svc *services.HomeAssistantService) Widget {

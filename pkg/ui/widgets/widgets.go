@@ -15,11 +15,18 @@ type Widget interface {
 	ShouldDisplay() bool
 	GetX() float32
 	GetY() float32
+	// Called when the widget is destroyed. All assets, textures, etc. should be unloaded.
+	Unload()
 }
 
 type Fetcher interface {
 	// Called prior to the rendering loop so that widgets can fetch information for display
 	FetchData(ctx context.Context)
+}
+
+type Loader interface {
+	LoadAssets()
+	UnloadAssets()
 }
 
 type baseWidget struct {
@@ -38,4 +45,8 @@ func (b *baseWidget) GetX() float32 {
 
 func (b *baseWidget) GetY() float32 {
 	return b.y
+}
+
+func (b *baseWidget) Unload() {
+	rl.UnloadRenderTexture(b.texture)
 }

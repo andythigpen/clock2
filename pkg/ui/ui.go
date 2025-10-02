@@ -51,6 +51,12 @@ func RunForever(haSvc *services.HomeAssistantService) {
 	// ordering matches the render order from back to front
 	allWidgets := []widgets.Widget{background, grid, clock, carousel}
 
+	for _, widget := range allWidgets {
+		if widget, ok := widget.(widgets.Loader); ok {
+			widget.LoadAssets()
+		}
+	}
+
 	for !rl.WindowShouldClose() {
 		frame += 1
 		ctx := context.WithValue(context.Background(), widgets.KeyFrame, frame)
@@ -95,4 +101,13 @@ func RunForever(haSvc *services.HomeAssistantService) {
 		rl.DrawTexturePro(texture.Texture, src, dst, rl.NewVector2(0, 0), rotation, rl.White)
 		rl.EndDrawing()
 	}
+
+	for _, widget := range allWidgets {
+		if widget, ok := widget.(widgets.Loader); ok {
+			widget.UnloadAssets()
+		}
+		widget.Unload()
+	}
+
+	rl.UnloadRenderTexture(texture)
 }
