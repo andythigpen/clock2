@@ -62,8 +62,6 @@ func (g *grid) ShouldDisplay() bool {
 
 func NewGrid(width, height int32) Widget {
 	return &grid{
-		baseWidget: baseWidget{
-			texture: rl.LoadRenderTexture(width, height),
-		},
+		baseWidget: newBaseWidget(0, 0, width, height),
 	}
 }

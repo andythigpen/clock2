@@ -67,12 +67,14 @@ func (w *weatherCurrent) RenderTexture(ctx context.Context) {
 	y := w.texture.Texture.Height/2 - (w.icon.Height() / 2)
 	w.icon.RenderFrame(float32(x), float32(y))
 
+	spacing := float32(-16)
+	textX := float32(w.texture.Texture.Width)/2 + spacing
 	rl.DrawTextEx(
 		w.font,
 		w.temperature,
-		rl.NewVector2(540, -26),
+		rl.NewVector2(textX, -26),
 		float32(w.font.BaseSize),
-		-16.0,
+		spacing,
 		rl.White,
 	)
 }
@@ -98,10 +100,9 @@ func NewWeatherCurrent(width, height int32, svc *services.HomeAssistantService) 
 	iconName := getWeatherConditionIconName(weather.Cloudy)
 	iconPath := getAssetIconPath(iconName, Animated())
 	return &weatherCurrent{
-		baseWidget: baseWidget{
-			texture: rl.LoadRenderTexture(width, height),
-		},
-		svc:  svc,
+		baseWidget: newBaseWidget(0, 0, width, height),
+		svc:        svc,
+		// not from the font cache because of the extra rune
 		font: rl.LoadFontEx("assets/fonts/Oswald-Regular.ttf", 500, nil, '°'),
 		icon: NewAnimatedIcon(iconPath),
 	}

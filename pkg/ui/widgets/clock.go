@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/andythigpen/clock2/pkg/platform"
+	"github.com/andythigpen/clock2/pkg/ui/widgets/fonts"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -45,17 +46,9 @@ func (c *clock) RenderTexture(ctx context.Context) {
 }
 
 func NewClock(x, y float32, width, height int32) Widget {
-	runes := []rune{}
-	for r := '0'; r <= ':'; r++ {
-		runes = append(runes, r)
-	}
 	return &clock{
-		baseWidget: baseWidget{
-			texture: rl.LoadRenderTexture(width, height),
-			x:       x,
-			y:       y,
-		},
-		fontClock: rl.LoadFontEx("assets/fonts/BebasNeue-Regular.ttf", 540, runes),
-		fontDate:  rl.LoadFontEx("assets/fonts/Moulpali-Regular.ttf", 220, nil),
+		baseWidget: newBaseWidget(x, y, width, height),
+		fontClock:  fonts.Cache.Load(fonts.FontBebasNeue, 540),
+		fontDate:   fonts.Cache.Load(fonts.FontMoulpali, 220),
 	}
 }

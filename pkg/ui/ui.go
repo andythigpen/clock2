@@ -8,6 +8,7 @@ import (
 	"github.com/andythigpen/clock2/pkg/platform"
 	"github.com/andythigpen/clock2/pkg/services"
 	"github.com/andythigpen/clock2/pkg/ui/widgets"
+	"github.com/andythigpen/clock2/pkg/ui/widgets/fonts"
 )
 
 var (
@@ -26,7 +27,7 @@ func drawWidget(widget widgets.Widget) {
 	)
 }
 
-func RunForever(haSvc *services.HomeAssistantService) {
+func RunForever(haSvc *services.HomeAssistantService, displaySvc *services.DisplayService) {
 	rl.InitWindow(platform.ScreenWidth, platform.ScreenHeight, "clock")
 	defer rl.CloseWindow()
 
@@ -40,7 +41,7 @@ func RunForever(haSvc *services.HomeAssistantService) {
 	carouselWidth := int32(platform.WindowWidth - platform.ClockWidth)
 	carouselHeight := int32(platform.WindowHeight)
 	carousel := widgets.NewCarousel(
-		platform.ClockWidth, 0, carouselWidth, platform.WindowHeight,
+		platform.ClockWidth, 0, carouselWidth, carouselHeight,
 		widgets.NewWeatherCurrent(carouselWidth, carouselHeight, haSvc),
 		widgets.NewWeatherForecast(carouselWidth, carouselHeight, haSvc),
 		widgets.NewWeatherPrecipitation(carouselWidth, carouselHeight, haSvc),
@@ -56,6 +57,8 @@ func RunForever(haSvc *services.HomeAssistantService) {
 			widget.LoadAssets()
 		}
 	}
+
+	tint := rl.NewColor(255, 255, 255, 255)
 
 	for !rl.WindowShouldClose() {
 		frame += 1
@@ -96,9 +99,20 @@ func RunForever(haSvc *services.HomeAssistantService) {
 			rotation = 90.0
 		}
 
+		desiredBrightness := uint8(rl.Remap(float32(displaySvc.GetBrightness()), 0, 100, 0, 255))
+		if tint.R > desiredBrightness {
+			tint.R -= 1
+			tint.G -= 1
+			tint.B -= 1
+		} else if tint.R < desiredBrightness {
+			tint.R += 1
+			tint.G += 1
+			tint.B += 1
+		}
+
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.White) // reduces flickering
-		rl.DrawTexturePro(texture.Texture, src, dst, rl.NewVector2(0, 0), rotation, rl.White)
+		rl.DrawTexturePro(texture.Texture, src, dst, rl.NewVector2(0, 0), rotation, tint)
 		rl.EndDrawing()
 	}
 
@@ -108,6 +122,8 @@ func RunForever(haSvc *services.HomeAssistantService) {
 		}
 		widget.Unload()
 	}
+
+	fonts.Cache.Unload()
 
 	rl.UnloadRenderTexture(texture)
 }

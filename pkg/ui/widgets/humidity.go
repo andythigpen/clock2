@@ -7,6 +7,7 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 
 	"github.com/andythigpen/clock2/pkg/services"
+	"github.com/andythigpen/clock2/pkg/ui/widgets/fonts"
 )
 
 type humidity struct {
@@ -35,8 +36,7 @@ func (h *humidity) RenderTexture(ctx context.Context) {
 	h.icon.RenderFrame(float32(x), float32(y))
 
 	spacing := float32(-16.0)
-	textSize := rl.MeasureTextEx(h.font, h.humidity, float32(h.font.BaseSize), spacing)
-	textX := float32(h.texture.Texture.Width)*2/3 - textSize.X/2
+	textX := float32(h.texture.Texture.Width)/2 + spacing
 	rl.DrawTextEx(
 		h.font,
 		h.humidity,
@@ -62,11 +62,9 @@ func (h *humidity) UnloadAssets() {
 func NewHumidity(width, height int32, svc *services.HomeAssistantService) Widget {
 	iconPath := getAssetIconPath("humidity", Animated())
 	return &humidity{
-		baseWidget: baseWidget{
-			texture: rl.LoadRenderTexture(width, height),
-		},
-		svc:  svc,
-		font: rl.LoadFontEx("assets/fonts/Oswald-Regular.ttf", 500, nil),
-		icon: NewAnimatedIcon(iconPath),
+		baseWidget: newBaseWidget(0, 0, width, height),
+		svc:        svc,
+		font:       fonts.Cache.Load(fonts.FontOswald, 500),
+		icon:       NewAnimatedIcon(iconPath),
 	}
 }

@@ -33,6 +33,7 @@ type baseWidget struct {
 	texture rl.RenderTexture2D
 	x       float32
 	y       float32
+	loaded  bool
 }
 
 func (b *baseWidget) Texture() rl.Texture2D {
@@ -48,5 +49,17 @@ func (b *baseWidget) GetY() float32 {
 }
 
 func (b *baseWidget) Unload() {
-	rl.UnloadRenderTexture(b.texture)
+	if b.loaded {
+		rl.UnloadRenderTexture(b.texture)
+		b.loaded = false
+	}
+}
+
+func newBaseWidget(x, y float32, width, height int32) baseWidget {
+	return baseWidget{
+		texture: rl.LoadRenderTexture(width, height),
+		loaded:  true,
+		x:       x,
+		y:       y,
+	}
 }

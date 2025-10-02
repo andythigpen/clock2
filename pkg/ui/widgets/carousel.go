@@ -25,6 +25,7 @@ type carousel struct {
 	baseWidget
 	widgets         []Widget
 	index           int
+	indexNext       int
 	state           carouselState
 	transitionStart uint64
 	transitionEnd   uint64
@@ -37,7 +38,7 @@ func (c *carousel) currentWidget() Widget {
 	return c.widgets[c.index]
 }
 
-func (c *carousel) nextIndex() int {
+func (c *carousel) getNextIndex() int {
 	if !c.shouldAdvance {
 		return c.index
 	}
@@ -61,27 +62,35 @@ func (c *carousel) advanceTransition(frame uint64) {
 	case carouselStateFadeIn:
 		c.state = carouselStateNormal
 		c.transitionEnd = frame + (uint64(*uiTestCarouselSeconds) * platform.FPS)
+		c.indexNext = c.getNextIndex()
+		if c.indexNext != c.index {
+			widget := c.widgets[c.indexNext]
+			if widget, ok := widget.(Loader); ok {
+				widget.LoadAssets()
+			}
+		}
 	case carouselStateNormal:
 		c.state = carouselStateFadeOut
 		c.transitionEnd = frame + platform.FPS
 	case carouselStateFadeOut:
 		c.state = carouselStateFadeIn
 		c.transitionEnd = frame + platform.FPS
-		idx := c.nextIndex()
-		widget := c.currentWidget()
-		if widget, ok := widget.(Loader); ok {
-			widget.UnloadAssets()
+		if c.indexNext != c.index {
+			widget := c.currentWidget()
+			if widget, ok := widget.(Loader); ok {
+				widget.UnloadAssets()
+			}
 		}
-		widget = c.widgets[idx]
-		if widget, ok := widget.(Loader); ok {
-			widget.LoadAssets()
-		}
-		c.index = idx
+		c.index = c.indexNext
 	}
 }
 
 func (c *carousel) FetchData(ctx context.Context) {
-	for _, widget := range c.widgets {
+	for idx, widget := range c.widgets {
+		if idx == c.index && *uiTestCarouselWidget == -1 {
+			// skip the current widget so there are no abrupt changes if the data changes
+			continue
+		}
 		if widget, ok := widget.(Fetcher); ok {
 			widget.FetchData(ctx)
 		}
@@ -135,6 +144,11 @@ func (c *carousel) UnloadAssets() {
 	if widget, ok := widget.(Loader); ok {
 		widget.UnloadAssets()
 	}
+	if c.index != c.indexNext {
+		if widget, ok := c.widgets[c.indexNext].(Loader); ok {
+			widget.UnloadAssets()
+		}
+	}
 }
 
 func (c *carousel) Unload() {
@@ -149,13 +163,9 @@ func NewCarousel(x, y float32, width, height int32, widgets ...Widget) Widget {
 		panic("at least one widget is required")
 	}
 	c := &carousel{
-		baseWidget: baseWidget{
-			texture: rl.LoadRenderTexture(width, height),
-			x:       x,
-			y:       y,
-		},
-		widgets: widgets,
-		index:   0,
+		baseWidget: newBaseWidget(x, y, width, height),
+		widgets:    widgets,
+		index:      0,
 	}
 	if *uiTestCarouselWidget >= 0 && *uiTestCarouselWidget < len(c.widgets) {
 		c.index = *uiTestCarouselWidget

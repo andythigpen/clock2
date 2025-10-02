@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/andythigpen/clock2/pkg/services"
+	"github.com/andythigpen/clock2/pkg/ui/widgets/fonts"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -48,7 +49,7 @@ func (s *sun) RenderTexture(ctx context.Context) {
 
 	spacing := float32(-8.0)
 	textSize := rl.MeasureTextEx(s.fontClock, textTime, float32(s.fontClock.BaseSize), spacing)
-	textX := float32(s.texture.Texture.Width) / 2
+	textX := float32(s.texture.Texture.Width)/2 + spacing
 	textY := float32(s.texture.Texture.Height)/2 - textSize.Y/2
 	rl.DrawTextEx(
 		s.fontClock,
@@ -83,12 +84,10 @@ func (s *sun) UnloadAssets() {
 
 func NewSun(width, height int32, svc *services.HomeAssistantService) Widget {
 	return &sun{
-		baseWidget: baseWidget{
-			texture: rl.LoadRenderTexture(width, height),
-		},
+		baseWidget:  newBaseWidget(0, 0, width, height),
 		svc:         svc,
 		iconRising:  NewAnimatedIcon(getAssetIconPath("sunrise", WithSize(480), Animated())),
 		iconSetting: NewAnimatedIcon(getAssetIconPath("sunset", WithSize(480), Animated())),
-		fontClock:   rl.LoadFontEx("assets/fonts/BebasNeue-Regular.ttf", 340, nil),
+		fontClock:   fonts.Cache.Load(fonts.FontBebasNeue, 340),
 	}
 }

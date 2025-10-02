@@ -8,6 +8,7 @@ import (
 	"github.com/andythigpen/clock2/pkg/models/weather"
 	"github.com/andythigpen/clock2/pkg/platform"
 	"github.com/andythigpen/clock2/pkg/services"
+	"github.com/andythigpen/clock2/pkg/ui/widgets/fonts"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -17,6 +18,7 @@ type weatherTomorrow struct {
 	prevState    weather.WeatherCondition
 	currentState weather.WeatherCondition
 	icon         animatedIcon
+	font         rl.Font
 	fontTitle    rl.Font
 	tempLo       int8
 	tempHi       int8
@@ -105,10 +107,10 @@ func (w *weatherTomorrow) RenderTexture(ctx context.Context) {
 	titleSize := rl.MeasureTextEx(w.fontTitle, title, float32(w.fontTitle.BaseSize), spacing)
 	titleX := float32(w.texture.Texture.Width)*3/4 - (titleSize.X / 2) - platform.Margin/2
 	tempLo := strconv.Itoa(int(w.tempLo))
-	tempLoSize := rl.MeasureTextEx(w.fontTitle, tempLo, float32(w.fontTitle.BaseSize), spacing)
+	tempLoSize := rl.MeasureTextEx(w.font, tempLo, float32(w.font.BaseSize), spacing)
 	tempLoX := float32(w.texture.Texture.Width)/2 + spacing
 	tempHi := strconv.Itoa(int(w.tempHi))
-	tempHiSize := rl.MeasureTextEx(w.fontTitle, tempHi, float32(w.fontTitle.BaseSize), spacing)
+	tempHiSize := rl.MeasureTextEx(w.font, tempHi, float32(w.font.BaseSize), spacing)
 	tempHiX := float32(w.texture.Texture.Width) - platform.Margin - tempHiSize.X
 	tempY := float32(w.texture.Texture.Height) - 65 - tempLoSize.Y
 	rl.DrawTextEx(
@@ -120,27 +122,27 @@ func (w *weatherTomorrow) RenderTexture(ctx context.Context) {
 		rl.White,
 	)
 	rl.DrawTextEx(
-		w.fontTitle,
+		w.font,
 		strconv.Itoa(int(w.tempLo)),
 		rl.NewVector2(tempLoX, tempY), // position
-		float32(w.fontTitle.BaseSize), // font-size
+		float32(w.font.BaseSize),      // font-size
 		spacing,                       // spacing
 		rl.White,
 	)
 	rl.DrawTextEx(
-		w.fontTitle,
+		w.font,
 		strconv.Itoa(int(w.tempHi)),
 		rl.NewVector2(tempHiX, tempY), // position
-		float32(w.fontTitle.BaseSize), // font-size
+		float32(w.font.BaseSize),      // font-size
 		spacing,                       // spacing
 		rl.White,
 	)
 	colorLo := getGradientColor(w.tempLo)
 	colorHi := getGradientColor(w.tempHi)
 	colorHeight := float32(30)
-	colorX := tempLoX + tempLoSize.X + platform.Margin/2
+	colorX := tempLoX + tempLoSize.X + platform.Margin
 	colorY := tempY + tempLoSize.Y/2 - colorHeight/2
-	colorWidth := w.texture.Texture.Width/2 - int32(tempLoSize.X) - int32(tempHiSize.X) - platform.Margin - 10
+	colorWidth := w.texture.Texture.Width/2 - int32(tempLoSize.X) - int32(tempHiSize.X) - platform.Margin*2 - 10
 	rl.DrawRectangleGradientEx(
 		rl.NewRectangle(colorX, colorY, float32(colorWidth), colorHeight),
 		colorLo, // top left
@@ -148,6 +150,9 @@ func (w *weatherTomorrow) RenderTexture(ctx context.Context) {
 		colorHi, // top right
 		colorHi, // bottom right
 	)
+	radius := colorHeight / 2
+	rl.DrawCircleSector(rl.NewVector2(colorX, colorY+radius), radius, 90, 270, 10, colorLo)
+	rl.DrawCircleSector(rl.NewVector2(colorX+float32(colorWidth), colorY+radius), radius, -90, 90, 10, colorHi)
 }
 
 func (w *weatherTomorrow) ShouldDisplay() bool {
@@ -166,11 +171,10 @@ func NewWeatherTomorrow(width, height int32, svc *services.HomeAssistantService)
 	iconName := getWeatherConditionIconName(weather.Unknown)
 	iconPath := getAssetIconPath(iconName, Animated())
 	return &weatherTomorrow{
-		baseWidget: baseWidget{
-			texture: rl.LoadRenderTexture(width, height),
-		},
-		svc:       svc,
-		fontTitle: rl.LoadFontEx("assets/fonts/Oswald-Regular.ttf", 200, nil),
-		icon:      NewAnimatedIcon(iconPath),
+		baseWidget: newBaseWidget(0, 0, width, height),
+		svc:        svc,
+		font:       fonts.Cache.Load(fonts.FontOswald, 240),
+		fontTitle:  fonts.Cache.Load(fonts.FontOswald, 192, fonts.WithVariation(fonts.FontVariationBold)),
+		icon:       NewAnimatedIcon(iconPath),
 	}
 }

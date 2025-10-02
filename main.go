@@ -2,25 +2,21 @@ package main
 
 import (
 	"context"
-	// "embed"
 	"flag"
-	// "fmt"
+	"fmt"
 	"log"
 	"log/slog"
-	// "net/http"
+	"net/http"
 	"os"
 	"regexp"
 	"strings"
 
 	"github.com/joho/godotenv"
 
-	// "github.com/andythigpen/clock2/pkg/handlers"
+	"github.com/andythigpen/clock2/pkg/handlers"
 	"github.com/andythigpen/clock2/pkg/services"
 	"github.com/andythigpen/clock2/pkg/ui"
 )
-
-////go:embed assets/*
-// var assets embed.FS
 
 func makeHomeAssistant(ctx context.Context) *services.HomeAssistantService {
 	haUrl := os.Getenv("HA_URL")
@@ -89,21 +85,28 @@ func main() {
 
 	ctx := context.Background()
 	haSvc := makeHomeAssistant(ctx)
-	// displaySvc := makeDisplayService()
+	displaySvc := makeDisplayService()
 
-	ui.RunForever(haSvc)
+	mux := http.NewServeMux()
+	handlers.Register(mux, displaySvc)
 
-	// mux := http.NewServeMux()
-	// handlers.Register(mux, haSvc, displaySvc, assets)
-	//
-	// port := os.Getenv("PORT")
-	// if port == "" {
-	// 	port = "8080"
-	// }
-	// addr := fmt.Sprintf(":%s", port)
-	// slog.Info("listening", "addr", addr)
-	// if err := http.ListenAndServe(addr, mux); err != nil {
-	// 	slog.Error("failed to listen", "addr", addr)
-	// }
-	// haSvc.Stop()
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	addr := fmt.Sprintf(":%s", port)
+	slog.Info("listening", "addr", addr)
+	server := &http.Server{Addr: addr, Handler: mux}
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			slog.Error("failed to listen", "addr", addr)
+		}
+	}()
+
+	ui.RunForever(haSvc, displaySvc)
+
+	if err := server.Shutdown(ctx); err != nil {
+		slog.Error("failed to shutdown server")
+	}
+	haSvc.Stop()
 }

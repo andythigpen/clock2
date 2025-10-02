@@ -8,6 +8,7 @@ import (
 	"github.com/andythigpen/clock2/pkg/models/weather"
 	"github.com/andythigpen/clock2/pkg/platform"
 	"github.com/andythigpen/clock2/pkg/services"
+	"github.com/andythigpen/clock2/pkg/ui/widgets/fonts"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -96,22 +97,25 @@ func (w *weatherForecast) ShouldDisplay() bool {
 	return len(w.hours) >= 3
 }
 
+func (w *weatherForecast) Unload() {
+	w.baseWidget.Unload()
+	for _, t := range w.icons {
+		rl.UnloadTexture(t)
+	}
+}
+
 func NewWeatherForecast(width, height int32, svc *services.HomeAssistantService) Widget {
 	icons := make(map[weather.WeatherCondition]rl.Texture2D)
 	for _, condition := range weather.AllConditions {
 		iconName := getWeatherConditionIconName(condition)
 		iconPath := getAssetIconPath(iconName, WithSize(256))
-		img := rl.LoadImage(iconPath)
-		icons[condition] = rl.LoadTextureFromImage(img)
-		rl.UnloadImage(img)
+		icons[condition] = rl.LoadTexture(iconPath)
 	}
 	return &weatherForecast{
-		baseWidget: baseWidget{
-			texture: rl.LoadRenderTexture(width, height),
-		},
-		svc:      svc,
-		font:     rl.LoadFontEx("assets/fonts/Oswald-Regular.ttf", 240, nil),
-		fontHour: rl.LoadFontEx("assets/fonts/Oswald-Bold.ttf", 192, nil),
-		icons:    icons,
+		baseWidget: newBaseWidget(0, 0, width, height),
+		svc:        svc,
+		font:       fonts.Cache.Load(fonts.FontOswald, 240),
+		fontHour:   fonts.Cache.Load(fonts.FontOswald, 192, fonts.WithVariation(fonts.FontVariationBold)),
+		icons:      icons,
 	}
 }

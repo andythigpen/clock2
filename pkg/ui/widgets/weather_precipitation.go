@@ -11,6 +11,7 @@ import (
 	"github.com/andythigpen/clock2/pkg/models/weather"
 	"github.com/andythigpen/clock2/pkg/platform"
 	"github.com/andythigpen/clock2/pkg/services"
+	"github.com/andythigpen/clock2/pkg/ui/widgets/fonts"
 )
 
 var (
@@ -111,7 +112,7 @@ func (w *weatherPrecipitation) RenderTexture(ctx context.Context) {
 	spacing = float32(-16.0)
 	textProbability := fmt.Sprintf("%02d", int(w.precipitation.PrecipitationProbability))
 	textSize = rl.MeasureTextEx(w.font, textProbability, float32(w.font.BaseSize), spacing)
-	textX = float32(w.texture.Texture.Width) / 2
+	textX = float32(w.texture.Texture.Width)/2 + spacing
 	textY = float32(w.texture.Texture.Height)/2 - textSize.Y/2 + spacing
 	rl.DrawTextEx(
 		w.font,
@@ -140,12 +141,10 @@ func NewWeatherPrecipitation(width, height int32, svc *services.HomeAssistantSer
 	iconName := getWeatherConditionIconName(weather.Unknown)
 	iconPath := getAssetIconPath(iconName, Animated())
 	return &weatherPrecipitation{
-		baseWidget: baseWidget{
-			texture: rl.LoadRenderTexture(width, height),
-		},
-		svc:      svc,
-		font:     rl.LoadFontEx("assets/fonts/Oswald-Regular.ttf", 500, nil),
-		fontHour: rl.LoadFontEx("assets/fonts/Oswald-Bold.ttf", 192, nil),
-		icon:     NewAnimatedIcon(iconPath),
+		baseWidget: newBaseWidget(0, 0, width, height),
+		svc:        svc,
+		font:       fonts.Cache.Load(fonts.FontOswald, 500),
+		fontHour:   fonts.Cache.Load(fonts.FontOswald, 192, fonts.WithVariation(fonts.FontVariationBold)),
+		icon:       NewAnimatedIcon(iconPath),
 	}
 }

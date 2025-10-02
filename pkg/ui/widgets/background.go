@@ -131,11 +131,7 @@ func (b *background) ShouldDisplay() bool {
 
 func NewBackground(x, y float32, width, height int32, svc *services.HomeAssistantService) Widget {
 	return &background{
-		baseWidget: baseWidget{
-			texture: rl.LoadRenderTexture(width, height),
-			x:       x,
-			y:       y,
-		},
-		svc: svc,
+		baseWidget: newBaseWidget(x, y, width, height),
+		svc:        svc,
 	}
 }

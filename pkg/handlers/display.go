@@ -67,12 +67,13 @@ func (h *DisplayStateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 }
 
 type DisplayBrightnessHandler struct {
+	svc        *services.DisplayService
 	brightness uint8
 	updateCh   chan uint8
 }
 
-func NewDisplayBrightnessHandler() *DisplayBrightnessHandler {
-	return &DisplayBrightnessHandler{brightness: 100, updateCh: make(chan uint8)}
+func NewDisplayBrightnessHandler(svc *services.DisplayService) *DisplayBrightnessHandler {
+	return &DisplayBrightnessHandler{svc: svc, brightness: 100, updateCh: make(chan uint8)}
 }
 
 func (h *DisplayBrightnessHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -127,6 +128,7 @@ func (h *DisplayBrightnessHandler) ServeHTTP(w http.ResponseWriter, r *http.Requ
 				return
 			}
 			h.brightness = i
+			h.svc.SetBrightness(i)
 			select {
 			case h.updateCh <- h.brightness:
 				slog.Debug("notify brightness change", "brightness", h.brightness)

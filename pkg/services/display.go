@@ -16,24 +16,26 @@ const (
 )
 
 type DisplayService struct {
-	cmd      string
-	getArgs  []string
-	onArgs   []string
-	offArgs  []string
-	onMatch  *regexp.Regexp
-	offMatch *regexp.Regexp
+	cmd        string
+	getArgs    []string
+	onArgs     []string
+	offArgs    []string
+	onMatch    *regexp.Regexp
+	offMatch   *regexp.Regexp
+	brightness uint8
 }
 
 type DisplayServiceOption func(*DisplayService)
 
 func NewDisplayService(opts ...DisplayServiceOption) *DisplayService {
 	svc := &DisplayService{
-		cmd:      "vcgencmd",
-		getArgs:  []string{"display_power"},
-		onArgs:   []string{"display_power", "1"},
-		offArgs:  []string{"display_power", "0"},
-		onMatch:  regexp.MustCompile("display_power=1"),
-		offMatch: regexp.MustCompile("display_power=0"),
+		cmd:        "vcgencmd",
+		getArgs:    []string{"display_power"},
+		onArgs:     []string{"display_power", "1"},
+		offArgs:    []string{"display_power", "0"},
+		onMatch:    regexp.MustCompile("display_power=1"),
+		offMatch:   regexp.MustCompile("display_power=0"),
+		brightness: 100,
 	}
 
 	for _, o := range opts {
@@ -115,4 +117,12 @@ func (r *DisplayService) SetState(state DisplayState) error {
 		return fmt.Errorf("unexpected exit code %d", cmd.ProcessState.ExitCode())
 	}
 	return nil
+}
+
+func (r *DisplayService) GetBrightness() uint8 {
+	return r.brightness
+}
+
+func (r *DisplayService) SetBrightness(brightness uint8) {
+	r.brightness = brightness
 }
