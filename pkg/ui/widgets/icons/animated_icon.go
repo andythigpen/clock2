@@ -91,18 +91,6 @@ func (a *AnimatedIcon) RenderFrame(x, y float32) {
 		}
 		a.frameRec.X = float32(a.frameCurrent%a.cols) * a.frameRec.Width
 		a.frameRec.Y = float32(a.frameCurrent%(a.cols*a.rows)/a.cols) * a.frameRec.Height
-		// slog.Info(
-		// 	"RenderFrame",
-		// 	"frameTotal", a.frameTotal,
-		// 	"frameCurrent", a.frameCurrent,
-		// 	"textureCurrent", a.textureCurrent,
-		// 	"x", a.frameRec.X,
-		// 	"y", a.frameRec.Y,
-		// 	"w", a.frameRec.Width,
-		// 	"h", a.frameRec.Height,
-		// 	"cols", a.cols,
-		// 	"rows", a.rows,
-		// )
 	}
 	texture := a.textures[a.textureCurrent]
 	rl.DrawTextureRec(texture, a.frameRec, rl.NewVector2(x, y), rl.White)
@@ -126,7 +114,8 @@ func (a *AnimatedIcon) LoadAssets() {
 	a.frameCurrent = 0
 	a.textureCurrent = 0
 	a.textures = make([]rl.Texture2D, 0)
-	matches, _ := filepath.Glob(fmt.Sprintf("assets/icons/weather/sprites/%s-*.png", a.iconType))
+	matches, _ := filepath.Glob(fmt.Sprintf("assets/icons/weather/sprites/%s-[0-9].png", a.iconType))
+	slog.Info("LoadAssets before", "iconType", a.iconType, "matches", matches)
 	for _, filename := range matches {
 		slog.Info("LoadAssets", "filename", filename)
 		a.textures = append(a.textures, rl.LoadTexture(filename))

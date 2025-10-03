@@ -9,6 +9,7 @@ import (
 	"github.com/andythigpen/clock2/pkg/models/weather"
 	"github.com/andythigpen/clock2/pkg/platform"
 	"github.com/andythigpen/clock2/pkg/services"
+	"github.com/andythigpen/clock2/pkg/ui/widgets/fonts"
 	"github.com/andythigpen/clock2/pkg/ui/widgets/icons"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
@@ -151,11 +152,13 @@ func (w *weatherCurrent) Unload() {
 
 func NewWeatherCurrent(width, height int32, svc *services.HomeAssistantService) Widget {
 	iconType := icons.GetWeatherConditionIconType(weather.Unknown)
+	runes := []rune{'°'}
+	runes = append(runes, fonts.Numbers...)
 	return &weatherCurrent{
 		baseWidget: newBaseWidget(0, 0, width, height),
 		svc:        svc,
 		// not from the font cache because of the extra rune
-		font:        rl.LoadFontEx("assets/fonts/Oswald-Regular.ttf", 500, nil, '°'),
+		font:        rl.LoadFontEx(fonts.GetAssetFontPath(fonts.FontOswald), 500, runes),
 		icon:        icons.NewAnimatedIcon(iconType),
 		iconRising:  icons.NewAnimatedIcon(icons.IconPressureHigh),
 		iconFalling: icons.NewAnimatedIcon(icons.IconPressureLow),

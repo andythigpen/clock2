@@ -40,3 +40,7 @@ done
 for img in ./sprites/wind-*.png; do
     mv "$img" "${img/wind/windy}"
 done
+
+# all sprites must have a numeric suffix
+mv ./sprites/pressure-high{,-0}.png
+mv ./sprites/pressure-low{,-0}.png

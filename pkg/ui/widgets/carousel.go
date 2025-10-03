@@ -62,26 +62,22 @@ func (c *carousel) advanceTransition(frame uint64) {
 	case carouselStateFadeIn:
 		c.state = carouselStateNormal
 		c.transitionEnd = frame + (uint64(*uiTestCarouselSeconds) * platform.FPS)
-		c.indexNext = c.getNextIndex()
-		if c.indexNext != c.index {
-			widget := c.widgets[c.indexNext]
-			if widget, ok := widget.(Loader); ok {
-				widget.LoadAssets()
-			}
-		}
 	case carouselStateNormal:
 		c.state = carouselStateFadeOut
 		c.transitionEnd = frame + platform.FPS
 	case carouselStateFadeOut:
 		c.state = carouselStateFadeIn
 		c.transitionEnd = frame + platform.FPS
-		if c.indexNext != c.index {
-			widget := c.currentWidget()
-			if widget, ok := widget.(Loader); ok {
-				widget.UnloadAssets()
-			}
+		widget := c.currentWidget()
+		if widget, ok := widget.(Loader); ok {
+			widget.UnloadAssets()
 		}
+		c.indexNext = c.getNextIndex()
 		c.index = c.indexNext
+		widget = c.currentWidget()
+		if widget, ok := widget.(Loader); ok {
+			widget.LoadAssets()
+		}
 	}
 }
 

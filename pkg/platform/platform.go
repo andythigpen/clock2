@@ -6,7 +6,7 @@ const (
 	WindowWidth  = 1920
 	WindowHeight = 480
 
-	FPS = 60
+	FPS = 30 // the Raspberry Pi supports at most 30FPS
 )
 
 const (
