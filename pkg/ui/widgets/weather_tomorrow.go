@@ -9,6 +9,7 @@ import (
 	"github.com/andythigpen/clock2/pkg/platform"
 	"github.com/andythigpen/clock2/pkg/services"
 	"github.com/andythigpen/clock2/pkg/ui/widgets/fonts"
+	"github.com/andythigpen/clock2/pkg/ui/widgets/icons"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -17,7 +18,7 @@ type weatherTomorrow struct {
 	svc          *services.HomeAssistantService
 	prevState    weather.WeatherCondition
 	currentState weather.WeatherCondition
-	icon         animatedIcon
+	icon         icons.AnimatedIcon
 	font         rl.Font
 	fontTitle    rl.Font
 	tempLo       int8
@@ -85,9 +86,8 @@ func (w *weatherTomorrow) FetchData(ctx context.Context) {
 		}
 	}
 	if w.prevState != w.currentState {
-		iconName := getWeatherConditionIconName(w.currentState)
-		filename := getAssetIconPath(iconName, Animated())
-		w.icon.SetFilename(filename)
+		iconType := icons.GetWeatherConditionIconType(w.currentState)
+		w.icon.SetIconType(iconType)
 		w.prevState = w.currentState
 	}
 }
@@ -168,13 +168,12 @@ func (w *weatherTomorrow) UnloadAssets() {
 }
 
 func NewWeatherTomorrow(width, height int32, svc *services.HomeAssistantService) Widget {
-	iconName := getWeatherConditionIconName(weather.Unknown)
-	iconPath := getAssetIconPath(iconName, Animated())
+	iconType := icons.GetWeatherConditionIconType(weather.Unknown)
 	return &weatherTomorrow{
 		baseWidget: newBaseWidget(0, 0, width, height),
 		svc:        svc,
 		font:       fonts.Cache.Load(fonts.FontOswald, 240),
 		fontTitle:  fonts.Cache.Load(fonts.FontOswald, 192, fonts.WithVariation(fonts.FontVariationBold)),
-		icon:       NewAnimatedIcon(iconPath),
+		icon:       icons.NewAnimatedIcon(iconType),
 	}
 }

@@ -46,9 +46,13 @@ func (c *clock) RenderTexture(ctx context.Context) {
 }
 
 func NewClock(x, y float32, width, height int32) Widget {
+	runes := []rune{':'}
+	runes = append(runes, fonts.Numbers...)
 	return &clock{
 		baseWidget: newBaseWidget(x, y, width, height),
-		fontClock:  fonts.Cache.Load(fonts.FontBebasNeue, 540),
-		fontDate:   fonts.Cache.Load(fonts.FontMoulpali, 220),
+		// texture sizes on the raspberry pi are limited to 2048x2048 so only load in the characters we need...
+		// otherwise, the texture size would be too large
+		fontClock: rl.LoadFontEx(fonts.GetAssetFontPath(fonts.FontBebasNeue), 540, runes),
+		fontDate:  fonts.Cache.Load(fonts.FontMoulpali, 220),
 	}
 }

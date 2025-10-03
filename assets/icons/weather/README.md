@@ -3,6 +3,8 @@ Icons from https://github.com/basmilius/weather-icons
 * Renamed `overcast-{day,night}` to `cloudy-{day,night}`
 * Renamed `thunderstorms-{day,night}-rain` to `thunderstorms-rain-{day,night}`
 * Renamed `wind` to `windy`
+* Converted to sprite sheets using `lottieconvert` and `imagemagick` tools.
+* NOTE: Textures MUST be less than 2048x2048 to work on the Raspberry Pi.
 
 MIT License
 

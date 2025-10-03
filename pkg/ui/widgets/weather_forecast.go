@@ -9,6 +9,7 @@ import (
 	"github.com/andythigpen/clock2/pkg/platform"
 	"github.com/andythigpen/clock2/pkg/services"
 	"github.com/andythigpen/clock2/pkg/ui/widgets/fonts"
+	"github.com/andythigpen/clock2/pkg/ui/widgets/icons"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -105,17 +106,17 @@ func (w *weatherForecast) Unload() {
 }
 
 func NewWeatherForecast(width, height int32, svc *services.HomeAssistantService) Widget {
-	icons := make(map[weather.WeatherCondition]rl.Texture2D)
+	allIcons := make(map[weather.WeatherCondition]rl.Texture2D)
 	for _, condition := range weather.AllConditions {
-		iconName := getWeatherConditionIconName(condition)
-		iconPath := getAssetIconPath(iconName, WithSize(256))
-		icons[condition] = rl.LoadTexture(iconPath)
+		iconType := icons.GetWeatherConditionIconType(condition)
+		iconPath := icons.GetStaticIconPath(iconType, icons.WithSize(256))
+		allIcons[condition] = rl.LoadTexture(iconPath)
 	}
 	return &weatherForecast{
 		baseWidget: newBaseWidget(0, 0, width, height),
 		svc:        svc,
 		font:       fonts.Cache.Load(fonts.FontOswald, 240),
 		fontHour:   fonts.Cache.Load(fonts.FontOswald, 192, fonts.WithVariation(fonts.FontVariationBold)),
-		icons:      icons,
+		icons:      allIcons,
 	}
 }

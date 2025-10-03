@@ -27,15 +27,16 @@ for lottie in "${LOTTIE_FILES_400[@]}"; do
     bash ./sprite.sh "${lottie}"
 done
 
-rm ./sprites/*-1.png
-for file in ./sprites/*-0.png; do
-    if [[ -e "$file" ]]; then
-        mv "$file" "${file/-0/}"
-    fi
+# rename files to more closely match HA states
+for img in ./sprites/overcast-*.png; do
+    mv "$img" "${img/overcast/cloudy}"
 done
-
-mv ./sprites/{overcast,cloudy}-day.png
-mv ./sprites/{overcast,cloudy}-night.png
-mv ./sprites/thunderstorms-{day-rain,rain-day}.png
-mv ./sprites/thunderstorms-{night-rain,rain-night}.png
-mv ./sprites/wind{,y}.png
+for img in ./sprites/thunderstorms-day-rain-*.png; do
+    mv "$img" "${img/day-rain/rain-day}"
+done
+for img in ./sprites/thunderstorms-night-rain-*.png; do
+    mv "$img" "${img/night-rain/rain-night}"
+done
+for img in ./sprites/wind-*.png; do
+    mv "$img" "${img/wind/windy}"
+done

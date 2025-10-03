@@ -6,6 +6,7 @@ import (
 
 	"github.com/andythigpen/clock2/pkg/services"
 	"github.com/andythigpen/clock2/pkg/ui/widgets/fonts"
+	"github.com/andythigpen/clock2/pkg/ui/widgets/icons"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -14,8 +15,8 @@ type sun struct {
 	svc         *services.HomeAssistantService
 	rising      bool
 	fontClock   rl.Font
-	iconRising  animatedIcon
-	iconSetting animatedIcon
+	iconRising  icons.AnimatedIcon
+	iconSetting icons.AnimatedIcon
 	nextRising  time.Time
 	nextSetting time.Time
 }
@@ -86,8 +87,8 @@ func NewSun(width, height int32, svc *services.HomeAssistantService) Widget {
 	return &sun{
 		baseWidget:  newBaseWidget(0, 0, width, height),
 		svc:         svc,
-		iconRising:  NewAnimatedIcon(getAssetIconPath("sunrise", WithSize(480), Animated())),
-		iconSetting: NewAnimatedIcon(getAssetIconPath("sunset", WithSize(480), Animated())),
+		iconRising:  icons.NewAnimatedIcon(icons.IconSunrise),
+		iconSetting: icons.NewAnimatedIcon(icons.IconSunset),
 		fontClock:   fonts.Cache.Load(fonts.FontBebasNeue, 340),
 	}
 }

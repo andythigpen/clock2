@@ -12,6 +12,7 @@ import (
 	"github.com/andythigpen/clock2/pkg/platform"
 	"github.com/andythigpen/clock2/pkg/services"
 	"github.com/andythigpen/clock2/pkg/ui/widgets/fonts"
+	"github.com/andythigpen/clock2/pkg/ui/widgets/icons"
 )
 
 var (
@@ -22,7 +23,7 @@ type weatherPrecipitation struct {
 	baseWidget
 	svc           *services.HomeAssistantService
 	precipitation *weather.Forecast
-	icon          animatedIcon
+	icon          icons.AnimatedIcon
 	font          rl.Font
 	fontHour      rl.Font
 	prevState     weather.WeatherCondition
@@ -74,9 +75,8 @@ func (w *weatherPrecipitation) FetchData(ctx context.Context) {
 	}
 
 	if w.prevState != w.precipitation.Condition {
-		iconName := getWeatherConditionIconName(w.precipitation.Condition)
-		iconPath := getAssetIconPath(iconName, Animated())
-		w.icon.SetFilename(iconPath)
+		iconType := icons.GetWeatherConditionIconType(w.precipitation.Condition)
+		w.icon.SetIconType(iconType)
 		w.prevState = w.precipitation.Condition
 	}
 }
@@ -137,14 +137,18 @@ func (w *weatherPrecipitation) UnloadAssets() {
 	w.icon.UnloadAssets()
 }
 
+func (w *weatherPrecipitation) Unload() {
+	w.baseWidget.Unload()
+	rl.UnloadFont(w.font)
+}
+
 func NewWeatherPrecipitation(width, height int32, svc *services.HomeAssistantService) Widget {
-	iconName := getWeatherConditionIconName(weather.Unknown)
-	iconPath := getAssetIconPath(iconName, Animated())
+	iconType := icons.GetWeatherConditionIconType(weather.Unknown)
 	return &weatherPrecipitation{
 		baseWidget: newBaseWidget(0, 0, width, height),
 		svc:        svc,
-		font:       fonts.Cache.Load(fonts.FontOswald, 500),
+		font:       rl.LoadFontEx(fonts.GetAssetFontPath(fonts.FontOswald), 500, fonts.Numbers),
 		fontHour:   fonts.Cache.Load(fonts.FontOswald, 192, fonts.WithVariation(fonts.FontVariationBold)),
-		icon:       NewAnimatedIcon(iconPath),
+		icon:       icons.NewAnimatedIcon(iconType),
 	}
 }

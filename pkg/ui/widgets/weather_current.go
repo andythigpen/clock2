@@ -9,6 +9,7 @@ import (
 	"github.com/andythigpen/clock2/pkg/models/weather"
 	"github.com/andythigpen/clock2/pkg/platform"
 	"github.com/andythigpen/clock2/pkg/services"
+	"github.com/andythigpen/clock2/pkg/ui/widgets/icons"
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
@@ -20,9 +21,9 @@ type weatherCurrent struct {
 	baseWidget
 	svc                  *services.HomeAssistantService
 	font                 rl.Font
-	icon                 animatedIcon
-	iconRising           animatedIcon
-	iconFalling          animatedIcon
+	icon                 icons.AnimatedIcon
+	iconRising           icons.AnimatedIcon
+	iconFalling          icons.AnimatedIcon
 	prevState            weather.WeatherCondition
 	currentState         weather.WeatherCondition
 	temperature          string
@@ -38,14 +39,20 @@ func (w *weatherCurrent) FetchData(ctx context.Context) {
 		t := int32(rl.Remap(float32(frame%(30*platform.FPS)), 0, (30*platform.FPS)-1, -20, 110))
 		w.temperature = fmt.Sprintf("%d°", t)
 		w.currentState = w.prevState
-		if frame%360 == 0 { // there are currently 360 frames per animation
+		if frame%720 == 0 {
 			// cycle through icons
 			w.stateIdx += 1
-			if w.stateIdx > len(weather.AllConditions) {
+			if w.stateIdx >= len(weather.AllConditions) {
 				w.stateIdx = 0
 			}
+			w.prevState = w.currentState
 			w.currentState = weather.AllConditions[w.stateIdx]
+			iconType := icons.GetWeatherConditionIconType(w.currentState)
+			w.icon.SetIconType(iconType)
+			w.icon.UnloadAssets()
+			w.icon.LoadAssets()
 		}
+		return
 	} else {
 		currentWeather := w.svc.GetWeather()
 		w.currentState = currentWeather.State
@@ -76,9 +83,8 @@ func (w *weatherCurrent) FetchData(ctx context.Context) {
 
 	// load new icon on state change
 	if w.prevState != w.currentState {
-		iconName := getWeatherConditionIconName(w.currentState)
-		filename := getAssetIconPath(iconName, Animated())
-		w.icon.SetFilename(filename)
+		iconType := icons.GetWeatherConditionIconType(w.currentState)
+		w.icon.SetIconType(iconType)
 		w.prevState = w.currentState
 	}
 }
@@ -100,7 +106,7 @@ func (w *weatherCurrent) RenderTexture(ctx context.Context) {
 
 	// animate the direction arrow
 	if w.temperatureDirection != 0 {
-		var icon *animatedIcon
+		var icon *icons.AnimatedIcon
 		if w.temperatureDirection < 0 {
 			icon = &w.iconFalling
 		} else {
@@ -144,15 +150,14 @@ func (w *weatherCurrent) Unload() {
 }
 
 func NewWeatherCurrent(width, height int32, svc *services.HomeAssistantService) Widget {
-	iconName := getWeatherConditionIconName(weather.Unknown)
-	iconPath := getAssetIconPath(iconName, Animated())
+	iconType := icons.GetWeatherConditionIconType(weather.Unknown)
 	return &weatherCurrent{
 		baseWidget: newBaseWidget(0, 0, width, height),
 		svc:        svc,
 		// not from the font cache because of the extra rune
 		font:        rl.LoadFontEx("assets/fonts/Oswald-Regular.ttf", 500, nil, '°'),
-		icon:        NewAnimatedIcon(iconPath),
-		iconRising:  NewAnimatedIcon(getAssetIconPath("pressure-high", Animated())),
-		iconFalling: NewAnimatedIcon(getAssetIconPath("pressure-low", Animated())),
+		icon:        icons.NewAnimatedIcon(iconType),
+		iconRising:  icons.NewAnimatedIcon(icons.IconPressureHigh),
+		iconFalling: icons.NewAnimatedIcon(icons.IconPressureLow),
 	}
 }

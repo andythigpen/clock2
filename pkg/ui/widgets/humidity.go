@@ -8,13 +8,14 @@ import (
 
 	"github.com/andythigpen/clock2/pkg/services"
 	"github.com/andythigpen/clock2/pkg/ui/widgets/fonts"
+	"github.com/andythigpen/clock2/pkg/ui/widgets/icons"
 )
 
 type humidity struct {
 	baseWidget
 	svc      *services.HomeAssistantService
 	font     rl.Font
-	icon     animatedIcon
+	icon     icons.AnimatedIcon
 	humidity string
 }
 
@@ -59,12 +60,16 @@ func (h *humidity) UnloadAssets() {
 	h.icon.UnloadAssets()
 }
 
+func (h *humidity) Unload() {
+	h.baseWidget.Unload()
+	rl.UnloadFont(h.font)
+}
+
 func NewHumidity(width, height int32, svc *services.HomeAssistantService) Widget {
-	iconPath := getAssetIconPath("humidity", Animated())
 	return &humidity{
 		baseWidget: newBaseWidget(0, 0, width, height),
 		svc:        svc,
-		font:       fonts.Cache.Load(fonts.FontOswald, 500),
-		icon:       NewAnimatedIcon(iconPath),
+		font:       rl.LoadFontEx(fonts.GetAssetFontPath(fonts.FontOswald), 500, fonts.Numbers),
+		icon:       icons.NewAnimatedIcon(icons.IconHumidity),
 	}
 }
