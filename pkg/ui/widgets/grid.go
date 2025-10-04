@@ -20,6 +20,7 @@ type grid struct {
 func (g *grid) RenderTexture(ctx context.Context) {
 	rl.BeginTextureMode(g.texture)
 	defer rl.EndTextureMode()
+	rl.ClearBackground(rl.Blank)
 
 	color := rl.Red
 	colorThirds := rl.Green

@@ -25,7 +25,6 @@ func (c *clock) ShouldDisplay() bool {
 func (c *clock) RenderTexture(ctx context.Context) {
 	rl.BeginTextureMode(c.texture)
 	defer rl.EndTextureMode()
-
 	rl.ClearBackground(rl.Blank)
 
 	var display string

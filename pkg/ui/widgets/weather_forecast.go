@@ -54,6 +54,7 @@ func (w *weatherForecast) RenderTexture(ctx context.Context) {
 
 	rl.BeginTextureMode(w.texture)
 	defer rl.EndTextureMode()
+	rl.ClearBackground(rl.Blank)
 
 	width := w.texture.Texture.Width
 	iconWidth := w.hours[0].icon.Width
