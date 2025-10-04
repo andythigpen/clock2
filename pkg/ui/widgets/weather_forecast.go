@@ -18,13 +18,14 @@ type weatherForecast struct {
 	svc      *services.HomeAssistantService
 	font     rl.Font
 	fontHour rl.Font
-	icons    map[weather.WeatherCondition]rl.Texture2D
+	icons    []rl.Texture2D
 	hours    []forecastHour
 }
 
 type forecastHour struct {
 	hour        string
-	icon        rl.Texture2D
+	hour24      int
+	condition   weather.WeatherCondition
 	temperature string
 }
 
@@ -36,7 +37,8 @@ func (w *weatherForecast) FetchData(ctx context.Context) {
 		if hour.DateTime.After(now) {
 			hours = append(hours, forecastHour{
 				hour:        hour.DateTime.Format("03"),
-				icon:        w.icons[hour.Condition],
+				hour24:      hour.DateTime.Hour(),
+				condition:   hour.Condition,
 				temperature: strconv.Itoa(int(hour.Temperature)),
 			})
 			if len(hours) >= 3 {
@@ -48,17 +50,16 @@ func (w *weatherForecast) FetchData(ctx context.Context) {
 }
 
 func (w *weatherForecast) RenderTexture(ctx context.Context) {
-	if len(w.hours) < 3 {
-		panic("expected at least 3 hours of data")
-	}
-
 	rl.BeginTextureMode(w.texture)
 	defer rl.EndTextureMode()
 	rl.ClearBackground(rl.Blank)
 
+	if len(w.icons) == 0 || len(w.hours) == 0 {
+		// data may not be loaded yet...nothing to draw
+		return
+	}
+
 	width := w.texture.Texture.Width
-	iconWidth := w.hours[0].icon.Width
-	iconHeight := w.hours[0].icon.Height
 	margin := int32(platform.Margin)
 	marginTop := int32(35)
 	marginTopText := int32(-45)
@@ -79,8 +80,9 @@ func (w *weatherForecast) RenderTexture(ctx context.Context) {
 			0,                            // rotation
 			float32(w.fontHour.BaseSize), // fontSize
 			0,                            // spacing
-			rl.NewColor(255, 255, 255, 160),
+			rl.NewColor(255, 255, 255, 200),
 		)
+		iconHeight := w.icons[i].Height
 		rl.DrawTextPro(
 			w.font,
 			w.hours[i].temperature,
@@ -91,7 +93,8 @@ func (w *weatherForecast) RenderTexture(ctx context.Context) {
 			0,                        // spacing
 			rl.White,
 		)
-		rl.DrawTexture(w.hours[i].icon, c-iconWidth/2, marginTop, rl.White)
+		iconWidth := w.icons[i].Width
+		rl.DrawTexture(w.icons[i], c-iconWidth/2, marginTop, rl.White)
 	}
 }
 
@@ -99,25 +102,27 @@ func (w *weatherForecast) ShouldDisplay() bool {
 	return len(w.hours) >= 3
 }
 
-func (w *weatherForecast) Unload() {
-	w.baseWidget.Unload()
-	for _, t := range w.icons {
-		rl.UnloadTexture(t)
+func (w *weatherForecast) LoadAssets() {
+	for _, h := range w.hours {
+		iconType := icons.GetWeatherConditionIconType(h.condition, icons.WithHourOfDay(h.hour24))
+		iconPath := icons.GetStaticIconPath(iconType, icons.WithSize(256))
+		icon := rl.LoadTexture(iconPath)
+		w.icons = append(w.icons, icon)
 	}
 }
 
-func NewWeatherForecast(width, height int32, svc *services.HomeAssistantService) Widget {
-	allIcons := make(map[weather.WeatherCondition]rl.Texture2D)
-	for _, condition := range weather.AllConditions {
-		iconType := icons.GetWeatherConditionIconType(condition)
-		iconPath := icons.GetStaticIconPath(iconType, icons.WithSize(256))
-		allIcons[condition] = rl.LoadTexture(iconPath)
+func (w *weatherForecast) UnloadAssets() {
+	for _, i := range w.icons {
+		rl.UnloadTexture(i)
 	}
+	w.icons = nil
+}
+
+func NewWeatherForecast(width, height int32, svc *services.HomeAssistantService) Widget {
 	return &weatherForecast{
 		baseWidget: newBaseWidget(0, 0, width, height),
 		svc:        svc,
 		font:       fonts.Cache.Load(fonts.FontOswald, 240),
 		fontHour:   fonts.Cache.Load(fonts.FontOswald, 192, fonts.WithVariation(fonts.FontVariationBold)),
-		icons:      allIcons,
 	}
 }

@@ -43,21 +43,41 @@ var (
 	uiTestDayNight = flag.String("ui-test-day-night", "", "set to day or night to change asset icons")
 )
 
+type weatherIconTypeOptions struct {
+	isDay bool
+}
+
+type weatherIconTypeOption func(*weatherIconTypeOptions)
+
+func WithHourOfDay(hour int) weatherIconTypeOption {
+	return func(o *weatherIconTypeOptions) {
+		o.isDay = isDayHour(hour)
+	}
+}
+
 func isDay() bool {
 	if len(*uiTestDayNight) > 0 {
 		return *uiTestDayNight == "day"
 	}
-	now := time.Now()
-	hour := now.Hour()
+	hour := time.Now().Hour()
+	return isDayHour(hour)
+}
+
+func isDayHour(hour int) bool {
 	return hour >= 6 && hour <= 19
 }
 
-func GetWeatherConditionIconType(condition weather.WeatherCondition) IconType {
+func GetWeatherConditionIconType(condition weather.WeatherCondition, options ...weatherIconTypeOption) IconType {
+	opts := weatherIconTypeOptions{isDay: isDay()}
+	for _, o := range options {
+		o(&opts)
+	}
+
 	var name IconType
 	switch condition {
 	case weather.Clear, weather.Cloudy, weather.Fog, weather.PartlyCloudy, weather.Thunderstorms, weather.ThunderstormsRain:
 		name = IconType(condition)
-		if isDay() {
+		if opts.isDay {
 			return name + "-day"
 		}
 		return name + "-night"
@@ -71,21 +91,21 @@ func GetWeatherConditionIconType(condition weather.WeatherCondition) IconType {
 	return name
 }
 
-type weatherIconOptions struct {
+type iconOptions struct {
 	iconType string
 	size     int
 }
 
-type iconOption func(*weatherIconOptions)
+type iconOption func(*iconOptions)
 
 func WithSize(size int) iconOption {
-	return func(o *weatherIconOptions) {
+	return func(o *iconOptions) {
 		o.size = size
 	}
 }
 
 func GetStaticIconPath(iconType IconType, options ...iconOption) string {
-	o := &weatherIconOptions{
+	o := &iconOptions{
 		iconType: "weather",
 		size:     480,
 	}
