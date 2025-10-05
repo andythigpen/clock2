@@ -21,12 +21,7 @@ func NewDisplayStateHandler(svc *services.DisplayService) *DisplayStateHandler {
 
 func (h *DisplayStateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		state, err := h.svc.GetState()
-		if err != nil {
-			slog.Error("failed to get display state", "err", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+		state := h.svc.GetState()
 		enc := json.NewEncoder(w)
 		if err := enc.Encode(map[string]string{"state": string(state)}); err != nil {
 			slog.Error("failed to encode state", "err", err)
@@ -55,11 +50,7 @@ func (h *DisplayStateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 			slog.Error("invalid state in request", "body", body)
 			return
 		}
-		if err := h.svc.SetState(state); err != nil {
-			slog.Error("failed to set display state", "err", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+		h.svc.SetState(state)
 		return
 	}
 

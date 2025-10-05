@@ -25,3 +25,22 @@ Splash screen on pi:
 ```
 apt install rpd-plym-splash
 ```
+
+In order to control the screen blanking on the pi, the `raylib-go` package was forked and two new functions were added:
+```
+extern int GetDrmConnectorPropertyValue(uint32_t property_id, uint64_t *property_value);
+extern int SetDrmConnectorProperty(uint32_t property_id, uint64_t property_value);
+```
+
+To determine the property ids/values for DPMS, use
+```
+kmsprint -p
+```
+
+If for some reason they differ from the defaults `DPMS (2) = 0 (On) [On=0|Standby=1|Suspend=2|Off=3]`, the following env vars can be used to set new values:
+
+```
+DRM_DPMS_PROPERTY_ID
+DRM_DPMS_PROPERTY_VALUE_ON
+DRM_DPMS_PROPERTY_VALUE_OFF
+```

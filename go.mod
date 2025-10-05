@@ -2,6 +2,8 @@ module github.com/andythigpen/clock2
 
 go 1.25.0
 
+replace github.com/gen2brain/raylib-go/raylib => github.com/andythigpen/raylib-go/raylib v0.0.0-20251005172405-6dd297257213
+
 require (
 	github.com/gen2brain/raylib-go/raylib v0.55.1
 	github.com/joho/godotenv v1.5.1

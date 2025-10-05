@@ -2,10 +2,12 @@ package ui
 
 import (
 	"context"
+	"time"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 
 	"github.com/andythigpen/clock2/pkg/platform"
+	"github.com/andythigpen/clock2/pkg/platform/screen"
 	"github.com/andythigpen/clock2/pkg/services"
 	"github.com/andythigpen/clock2/pkg/ui/widgets"
 	"github.com/andythigpen/clock2/pkg/ui/widgets/fonts"
@@ -59,9 +61,27 @@ func RunForever(haSvc *services.HomeAssistantService, displaySvc *services.Displ
 	}
 
 	tint := rl.NewColor(255, 255, 255, 255)
+	displayState := services.DisplayStateOn
 
 	for !rl.WindowShouldClose() {
 		frame += 1
+
+		desiredDisplayState := displaySvc.GetState()
+		if desiredDisplayState != displayState {
+			switch desiredDisplayState {
+			case services.DisplayStateOff:
+				screen.ScreenOff()
+			case services.DisplayStateOn:
+				screen.ScreenOn()
+			}
+			displayState = desiredDisplayState
+		}
+		if displayState == services.DisplayStateOff {
+			// stop writing to the framebuffer, otherwise raylib will turn the display back on
+			time.Sleep(time.Second / platform.FPS)
+			continue
+		}
+
 		ctx := context.WithValue(context.Background(), widgets.KeyFrame, frame)
 
 		// render widgets to textures first

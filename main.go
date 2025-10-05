@@ -8,7 +8,6 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-	"regexp"
 	"strings"
 
 	"github.com/joho/godotenv"
@@ -36,32 +35,7 @@ func makeHomeAssistant(ctx context.Context) *services.HomeAssistantService {
 }
 
 func makeDisplayService() *services.DisplayService {
-	opts := []services.DisplayServiceOption{}
-	displayCmd := os.Getenv("DISPLAY_CMD")
-	if displayCmd != "" {
-		opts = append(opts, services.WithDisplayCommand(displayCmd))
-	}
-	getArgs := os.Getenv("DISPLAY_GET_ARGS")
-	if getArgs != "" {
-		opts = append(opts, services.WithDisplayGetArgs(strings.Split(getArgs, " ")...))
-	}
-	onArgs := os.Getenv("DISPLAY_ON_ARGS")
-	if onArgs != "" {
-		opts = append(opts, services.WithDisplayOnArgs(strings.Split(onArgs, " ")...))
-	}
-	offArgs := os.Getenv("DISPLAY_OFF_ARGS")
-	if offArgs != "" {
-		opts = append(opts, services.WithDisplayOffArgs(strings.Split(offArgs, " ")...))
-	}
-	onMatch := os.Getenv("DISPLAY_ON_MATCH")
-	if onMatch != "" {
-		opts = append(opts, services.WithDisplayOnMatch(regexp.MustCompile(onMatch)))
-	}
-	offMatch := os.Getenv("DISPLAY_OFF_MATCH")
-	if offMatch != "" {
-		opts = append(opts, services.WithDisplayOffMatch(regexp.MustCompile(offMatch)))
-	}
-	return services.NewDisplayService(opts...)
+	return services.NewDisplayService()
 }
 
 func main() {
