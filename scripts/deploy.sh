@@ -2,5 +2,5 @@
 
 set -e
 
-go build -tags drm,pi -o bin/clock
-systemctl restart clock.service
+/usr/local/go/bin/go build -tags drm,pi -o bin/clock
+sudo /usr/bin/systemctl restart clock.service
