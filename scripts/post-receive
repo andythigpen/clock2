@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -e
+
+GIT_WORK_TREE=/srv/clock2/source git checkout main -f
+pushd /srv/clock2/source
+bash scripts/deploy.sh
+popd

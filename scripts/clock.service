@@ -5,8 +5,8 @@ After=network.target
 [Service]
 Restart=on-failure
 User=pi
-ExecStart=/home/pi/clock2/bin/clock
-WorkingDirectory=/home/pi/clock2
+ExecStart=/srv/clock2/source/bin/clock
+WorkingDirectory=/srv/clock2/source
 
 [Install]
 WantedBy=multi-user.target
