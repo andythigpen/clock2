@@ -115,9 +115,9 @@ func (a *AnimatedIcon) LoadAssets() {
 	a.textureCurrent = 0
 	a.textures = make([]rl.Texture2D, 0)
 	matches, _ := filepath.Glob(fmt.Sprintf("assets/icons/weather/sprites/%s-[0-9].png", a.iconType))
-	slog.Info("LoadAssets before", "iconType", a.iconType, "matches", matches)
+	slog.Debug("LoadAssets before", "iconType", a.iconType, "matches", matches)
 	for _, filename := range matches {
-		slog.Info("LoadAssets", "filename", filename)
+		slog.Debug("LoadAssets", "filename", filename)
 		a.textures = append(a.textures, rl.LoadTexture(filename))
 	}
 	d := icons[a.iconType]

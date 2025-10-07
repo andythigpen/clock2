@@ -2,6 +2,8 @@ package ui
 
 import (
 	"context"
+	"os"
+	"strings"
 	"time"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -30,6 +32,17 @@ func drawWidget(widget widgets.Widget) {
 }
 
 func RunForever(haSvc *services.HomeAssistantService, displaySvc *services.DisplayService) {
+	switch strings.ToLower(os.Getenv("LOG_LEVEL")) {
+	case "debug":
+		rl.SetTraceLogLevel(rl.LogDebug)
+	case "warning", "warn":
+		rl.SetTraceLogLevel(rl.LogWarning)
+	case "error", "err":
+		rl.SetTraceLogLevel(rl.LogError)
+	default:
+		rl.SetTraceLogLevel(rl.LogInfo)
+	}
+
 	rl.InitWindow(platform.ScreenWidth, platform.ScreenHeight, "clock")
 	defer rl.CloseWindow()
 
