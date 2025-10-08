@@ -21,12 +21,13 @@ var (
 
 type weatherPrecipitation struct {
 	baseWidget
-	svc           *services.HomeAssistantService
-	precipitation *weather.Forecast
-	icon          icons.AnimatedIcon
-	font          rl.Font
-	fontHour      rl.Font
-	fontPercent   rl.Font
+	svc                    *services.HomeAssistantService
+	precipitation          *weather.Forecast
+	testPrecipitationIndex int
+	icon                   icons.AnimatedIcon
+	font                   rl.Font
+	fontHour               rl.Font
+	fontPercent            rl.Font
 }
 
 var _ Fetcher = (*weatherPrecipitation)(nil)
@@ -43,11 +44,8 @@ func isPrecipitation(condition weather.WeatherCondition) bool {
 func (w *weatherPrecipitation) FetchData(ctx context.Context) {
 	if *uiTestPrecipitation {
 		frame := ctx.Value(KeyFrame).(uint64)
-		idx := int(frame) / 360 % len(weather.AllConditions)
-		condition := weather.AllConditions[idx]
 		w.precipitation = &weather.Forecast{
-			DateTime:                 time.Now(),
-			Condition:                condition,
+			DateTime:                 time.Now().Add(time.Duration(frame/platform.FPS%24) * time.Hour),
 			PrecipitationProbability: uint8(frame / platform.FPS % 100),
 		}
 	} else {
@@ -86,17 +84,14 @@ func (w *weatherPrecipitation) RenderTexture(ctx context.Context) {
 	// hour text
 	spacing := float32(0)
 	textHour := w.precipitation.DateTime.Format("03")
-	textSize := rl.MeasureTextEx(w.font, textHour, float32(w.font.BaseSize), spacing)
-	textX := float32(w.texture.Texture.Width) / 4
-	textY := float32(w.texture.Texture.Height)/4 - textSize.Y/2 + spacing
 	rl.DrawTextPro(
 		w.fontHour,
 		textHour,
-		rl.NewVector2(320, 30),
+		rl.NewVector2(350, 0),
 		rl.NewVector2(0, 0),          // origin
 		0,                            // rotation
 		float32(w.fontHour.BaseSize), // fontSize
-		0,                            // spacing
+		spacing,                      // spacing
 		rl.NewColor(255, 255, 255, 200),
 	)
 
@@ -108,9 +103,9 @@ func (w *weatherPrecipitation) RenderTexture(ctx context.Context) {
 	// probability text
 	spacing = float32(-16.0)
 	textProbability := fmt.Sprintf("%02d", int(w.precipitation.PrecipitationProbability))
-	textSize = rl.MeasureTextEx(w.font, textProbability, float32(w.font.BaseSize), spacing)
-	textX = float32(w.texture.Texture.Width)/2 + spacing
-	textY = float32(w.texture.Texture.Height)/2 - textSize.Y/2 + spacing
+	textSize := rl.MeasureTextEx(w.font, textProbability, float32(w.font.BaseSize), spacing)
+	textX := float32(w.texture.Texture.Width)/2 + spacing
+	textY := float32(w.texture.Texture.Height)/2 - textSize.Y/2 + spacing
 	rl.DrawTextEx(
 		w.font,
 		textProbability,
@@ -134,6 +129,15 @@ func (w *weatherPrecipitation) ShouldDisplay() bool {
 }
 
 func (w *weatherPrecipitation) LoadAssets() {
+	if *uiTestPrecipitation {
+		condition := weather.PrecipitationConditions[w.testPrecipitationIndex]
+		iconType := icons.GetWeatherConditionIconType(condition)
+		w.icon.SetIconType(iconType)
+		w.testPrecipitationIndex += 1
+		if w.testPrecipitationIndex >= len(weather.PrecipitationConditions) {
+			w.testPrecipitationIndex = 0
+		}
+	}
 	w.icon.LoadAssets()
 }
 

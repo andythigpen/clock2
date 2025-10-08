@@ -31,16 +31,18 @@ func (c *clock) RenderTexture(ctx context.Context) {
 	now := time.Now().Local()
 	if *uiTestClock {
 		frame := ctx.Value(KeyFrame).(uint64)
-		now = now.Add(time.Duration(frame) * time.Second)
+		now = now.Add(time.Duration(frame*platform.FPS) * time.Second)
 	}
 	display = now.Format("03:04")
-	pos := rl.NewVector2(platform.Margin, 2*platform.Margin)
-	rl.DrawTextEx(c.fontClock, display, pos, float32(c.fontClock.BaseSize), -8.0, rl.White)
+	spacing := float32(-8)
+	textSize := rl.MeasureTextEx(c.fontClock, display, float32(c.fontClock.BaseSize), spacing)
+	pos := rl.NewVector2((platform.ClockWidth-textSize.X)/2, 2*platform.Margin)
+	rl.DrawTextEx(c.fontClock, display, pos, float32(c.fontClock.BaseSize), spacing, rl.White)
 
 	display = now.Format("Mon Jan _2")
 	v := rl.MeasureTextEx(c.fontDate, display, float32(c.fontDate.BaseSize), 0.0)
-	spacing := (float32(c.texture.Texture.Width) - platform.Margin - v.X) / 2.0
-	pos = rl.NewVector2(platform.Margin+spacing, -40)
+	spacing = (float32(c.texture.Texture.Width) - platform.Margin - v.X) / 2.0
+	pos = rl.NewVector2(platform.Margin+spacing, -48)
 	rl.DrawTextEx(c.fontDate, display, pos, float32(c.fontDate.BaseSize), 0.0, rl.White)
 }
 

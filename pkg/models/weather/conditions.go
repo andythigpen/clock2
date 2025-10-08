@@ -41,6 +41,15 @@ var AllConditions = []WeatherCondition{
 	Windy,
 }
 
+var PrecipitationConditions = []WeatherCondition{
+	Hail,
+	Rain,
+	Sleet,
+	Snow,
+	Thunderstorms,
+	ThunderstormsRain,
+}
+
 func (r WeatherCondition) String() string {
 	switch r {
 	case Exceptional:
