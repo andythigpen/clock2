@@ -25,7 +25,6 @@ type weatherCurrent struct {
 	icon                 icons.AnimatedIcon
 	iconRising           icons.AnimatedIcon
 	iconFalling          icons.AnimatedIcon
-	prevState            weather.WeatherCondition
 	currentState         weather.WeatherCondition
 	temperature          string
 	temperatureDirection int
@@ -39,14 +38,12 @@ func (w *weatherCurrent) FetchData(ctx context.Context) {
 		frame := ctx.Value(KeyFrame).(uint64)
 		t := int32(rl.Remap(float32(frame%(30*platform.FPS)), 0, (30*platform.FPS)-1, -20, 110))
 		w.temperature = fmt.Sprintf("%d°", t)
-		w.currentState = w.prevState
 		if frame%720 == 0 {
 			// cycle through icons
 			w.stateIdx += 1
 			if w.stateIdx >= len(weather.AllConditions) {
 				w.stateIdx = 0
 			}
-			w.prevState = w.currentState
 			w.currentState = weather.AllConditions[w.stateIdx]
 			iconType := icons.GetWeatherConditionIconType(w.currentState)
 			w.icon.SetIconType(iconType)
@@ -82,12 +79,8 @@ func (w *weatherCurrent) FetchData(ctx context.Context) {
 		}
 	}
 
-	// load new icon on state change
-	if w.prevState != w.currentState {
-		iconType := icons.GetWeatherConditionIconType(w.currentState)
-		w.icon.SetIconType(iconType)
-		w.prevState = w.currentState
-	}
+	iconType := icons.GetWeatherConditionIconType(w.currentState)
+	w.icon.SetIconType(iconType)
 }
 
 func (w *weatherCurrent) RenderTexture(ctx context.Context) {

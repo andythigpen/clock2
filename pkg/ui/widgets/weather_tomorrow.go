@@ -16,7 +16,6 @@ import (
 type weatherTomorrow struct {
 	baseWidget
 	svc          *services.HomeAssistantService
-	prevState    weather.WeatherCondition
 	currentState weather.WeatherCondition
 	icon         icons.AnimatedIcon
 	font         rl.Font
@@ -85,11 +84,9 @@ func (w *weatherTomorrow) FetchData(ctx context.Context) {
 			maximum = num
 		}
 	}
-	if w.prevState != w.currentState {
-		iconType := icons.GetWeatherConditionIconType(w.currentState)
-		w.icon.SetIconType(iconType)
-		w.prevState = w.currentState
-	}
+	// use hour 12 so that the icon is always the day version
+	iconType := icons.GetWeatherConditionIconType(w.currentState, icons.WithHourOfDay(12))
+	w.icon.SetIconType(iconType)
 }
 
 func (w *weatherTomorrow) RenderTexture(ctx context.Context) {

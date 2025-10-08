@@ -26,7 +26,6 @@ type weatherPrecipitation struct {
 	icon          icons.AnimatedIcon
 	font          rl.Font
 	fontHour      rl.Font
-	prevState     weather.WeatherCondition
 }
 
 var _ Fetcher = (*weatherPrecipitation)(nil)
@@ -74,11 +73,8 @@ func (w *weatherPrecipitation) FetchData(ctx context.Context) {
 		return
 	}
 
-	if w.prevState != w.precipitation.Condition {
-		iconType := icons.GetWeatherConditionIconType(w.precipitation.Condition)
-		w.icon.SetIconType(iconType)
-		w.prevState = w.precipitation.Condition
-	}
+	iconType := icons.GetWeatherConditionIconType(w.precipitation.Condition, icons.WithHourOfDay(w.precipitation.DateTime.Hour()))
+	w.icon.SetIconType(iconType)
 }
 
 func (w *weatherPrecipitation) RenderTexture(ctx context.Context) {
