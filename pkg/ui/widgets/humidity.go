@@ -13,10 +13,11 @@ import (
 
 type humidity struct {
 	baseWidget
-	svc      *services.HomeAssistantService
-	font     rl.Font
-	icon     icons.AnimatedIcon
-	humidity string
+	svc         *services.HomeAssistantService
+	font        rl.Font
+	fontPercent rl.Font
+	icon        icons.AnimatedIcon
+	humidity    string
 }
 
 var _ Fetcher = (*humidity)(nil)
@@ -46,6 +47,15 @@ func (h *humidity) RenderTexture(ctx context.Context) {
 		spacing,
 		rl.White,
 	)
+	textSize := rl.MeasureTextEx(h.font, h.humidity, float32(h.font.BaseSize), spacing)
+	rl.DrawTextEx(
+		h.fontPercent,
+		"%",
+		rl.NewVector2(textX+textSize.X, 50),
+		float32(h.fontPercent.BaseSize),
+		spacing,
+		rl.White,
+	)
 }
 
 func (h *humidity) ShouldDisplay() bool {
@@ -67,9 +77,10 @@ func (h *humidity) Unload() {
 
 func NewHumidity(width, height int32, svc *services.HomeAssistantService) Widget {
 	return &humidity{
-		baseWidget: newBaseWidget(0, 0, width, height),
-		svc:        svc,
-		font:       rl.LoadFontEx(fonts.GetAssetFontPath(fonts.FontOswald), 500, fonts.Numbers),
-		icon:       icons.NewAnimatedIcon(icons.IconHumidity),
+		baseWidget:  newBaseWidget(0, 0, width, height),
+		svc:         svc,
+		font:        rl.LoadFontEx(fonts.GetAssetFontPath(fonts.FontOswald), 500, fonts.Numbers),
+		fontPercent: fonts.Cache.Load(fonts.FontOswald, 192),
+		icon:        icons.NewAnimatedIcon(icons.IconHumidity),
 	}
 }

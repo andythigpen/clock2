@@ -93,9 +93,9 @@ func (w *weatherCurrent) RenderTexture(ctx context.Context) {
 	y := w.texture.Texture.Height/2 - (w.icon.Height() / 2)
 	w.icon.RenderFrame(float32(x), float32(y))
 
-	spacing := float32(-16)
+	spacing := float32(-16.0)
 	textSize := rl.MeasureTextEx(w.font, w.temperature, float32(w.font.BaseSize), spacing)
-	textX := float32(w.texture.Texture.Width)/2 + spacing
+	textX := float32(w.texture.Texture.Width)/2 + spacing/2
 	textY := float32(-26)
 
 	// animate the direction arrow

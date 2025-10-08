@@ -26,6 +26,7 @@ type weatherPrecipitation struct {
 	icon          icons.AnimatedIcon
 	font          rl.Font
 	fontHour      rl.Font
+	fontPercent   rl.Font
 }
 
 var _ Fetcher = (*weatherPrecipitation)(nil)
@@ -118,7 +119,14 @@ func (w *weatherPrecipitation) RenderTexture(ctx context.Context) {
 		spacing,
 		rl.White,
 	)
-
+	rl.DrawTextEx(
+		w.fontPercent,
+		"%",
+		rl.NewVector2(textX+textSize.X, 50),
+		float32(w.fontPercent.BaseSize),
+		spacing,
+		rl.White,
+	)
 }
 
 func (w *weatherPrecipitation) ShouldDisplay() bool {
@@ -141,10 +149,11 @@ func (w *weatherPrecipitation) Unload() {
 func NewWeatherPrecipitation(width, height int32, svc *services.HomeAssistantService) Widget {
 	iconType := icons.GetWeatherConditionIconType(weather.Unknown)
 	return &weatherPrecipitation{
-		baseWidget: newBaseWidget(0, 0, width, height),
-		svc:        svc,
-		font:       rl.LoadFontEx(fonts.GetAssetFontPath(fonts.FontOswald), 500, fonts.Numbers),
-		fontHour:   fonts.Cache.Load(fonts.FontOswald, 192, fonts.WithVariation(fonts.FontVariationBold)),
-		icon:       icons.NewAnimatedIcon(iconType),
+		baseWidget:  newBaseWidget(0, 0, width, height),
+		svc:         svc,
+		font:        rl.LoadFontEx(fonts.GetAssetFontPath(fonts.FontOswald), 500, fonts.Numbers),
+		fontHour:    fonts.Cache.Load(fonts.FontOswald, 192, fonts.WithVariation(fonts.FontVariationBold)),
+		fontPercent: fonts.Cache.Load(fonts.FontOswald, 192),
+		icon:        icons.NewAnimatedIcon(iconType),
 	}
 }
