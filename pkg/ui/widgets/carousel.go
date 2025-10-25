@@ -27,8 +27,8 @@ type carousel struct {
 	index           int
 	indexNext       int
 	state           carouselState
-	transitionStart uint64
-	transitionEnd   uint64
+	transitionFrame int
+	transitionEnd   int
 	shouldAdvance   bool
 }
 
@@ -56,18 +56,18 @@ func (c *carousel) getNextIndex() int {
 	return idx
 }
 
-func (c *carousel) advanceTransition(frame uint64) {
-	c.transitionStart = frame
+func (c *carousel) advanceTransition() {
+	c.transitionFrame = 0
 	switch c.state {
 	case carouselStateFadeIn:
 		c.state = carouselStateNormal
-		c.transitionEnd = frame + (uint64(*uiTestCarouselSeconds) * platform.FPS)
+		c.transitionEnd = (*uiTestCarouselSeconds) * platform.FPS
 	case carouselStateNormal:
 		c.state = carouselStateFadeOut
-		c.transitionEnd = frame + platform.FPS
+		c.transitionEnd = 1 * platform.FPS
 	case carouselStateFadeOut:
 		c.state = carouselStateFadeIn
-		c.transitionEnd = frame + platform.FPS
+		c.transitionEnd = 1 * platform.FPS
 		widget := c.currentWidget()
 		if widget, ok := widget.(Loader); ok {
 			widget.UnloadAssets()
@@ -94,9 +94,9 @@ func (c *carousel) FetchData(ctx context.Context) {
 }
 
 func (c *carousel) RenderTexture(ctx context.Context) {
-	frame := ctx.Value(KeyFrame).(uint64)
-	if frame >= c.transitionEnd {
-		c.advanceTransition(frame)
+	c.transitionFrame += 1
+	if c.transitionFrame >= c.transitionEnd {
+		c.advanceTransition()
 	}
 
 	widget := c.currentWidget()
@@ -111,9 +111,9 @@ func (c *carousel) RenderTexture(ctx context.Context) {
 	case carouselStateNormal:
 		alpha = 255
 	case carouselStateFadeIn:
-		alpha = uint8(rl.Remap(float32(frame), float32(c.transitionStart), float32(c.transitionEnd), 0, 255))
+		alpha = uint8(rl.Remap(float32(c.transitionFrame), 0, float32(c.transitionEnd), 0, 255))
 	case carouselStateFadeOut:
-		alpha = uint8(rl.Remap(float32(frame), float32(c.transitionStart), float32(c.transitionEnd), 255, 0))
+		alpha = uint8(rl.Remap(float32(c.transitionFrame), 0, float32(c.transitionEnd), 255, 0))
 	}
 	rl.DrawTexturePro(texture,
 		rl.NewRectangle(0, 0, float32(texture.Width), -float32(texture.Height)),
