@@ -56,8 +56,10 @@ func getGradientColor(temp int8) rl.Color {
 }
 
 func (w *weatherTomorrow) FetchData(ctx context.Context) {
-	tomorrow := time.Now().AddDate(0, 0, 1).Truncate(24 * time.Hour)
-	dayAfterTomorrow := time.Now().AddDate(0, 0, 2).Truncate(24 * time.Hour)
+	tomorrow := time.Now().AddDate(0, 0, 1)
+	tomorrow = time.Date(tomorrow.Year(), tomorrow.Month(), tomorrow.Day(), 0, 0, 0, 0, tomorrow.Location())
+	dayAfterTomorrow := time.Now().AddDate(0, 0, 2)
+	dayAfterTomorrow = time.Date(dayAfterTomorrow.Year(), dayAfterTomorrow.Month(), dayAfterTomorrow.Day(), 0, 0, 0, 0, dayAfterTomorrow.Location())
 	conditions := map[weather.WeatherCondition]int{}
 	w.tempHi = int8(-127)
 	w.tempLo = int8(127)
