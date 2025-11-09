@@ -144,7 +144,6 @@ func RunForever(haSvc *services.HomeAssistantService, displaySvc *services.Displ
 		}
 
 		rl.BeginDrawing()
-		rl.ClearBackground(rl.White) // reduces flickering
 		rl.DrawTexturePro(texture.Texture, src, dst, rl.NewVector2(0, 0), rotation, tint)
 		rl.EndDrawing()
 	}
